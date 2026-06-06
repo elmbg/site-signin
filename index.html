@@ -179,17 +179,23 @@ function renderList(q){
   const msg = document.getElementById('searchMsg');
   box.innerHTML=''; msg.innerHTML='';
 
-  if(WORKERS.length===0){
-    msg.innerHTML='<div class="msg">No inducted workers found for this site. Complete your induction before signing in.</div>';
+  // Sign Out is restricted to workers currently on site (isOnSite flag from the cache);
+  // Sign In uses the full inducted roster.
+  const base = (mode==='out') ? WORKERS.filter(w=>w.isOnSite) : WORKERS;
+
+  if(base.length===0){
+    msg.innerHTML = (mode==='out')
+      ? '<div class="msg">No workers are currently signed in for this site.</div>'
+      : '<div class="msg">No inducted workers found for this site. Complete your induction before signing in.</div>';
     return;
   }
   const term = (q||'').trim().toLowerCase();
   if(term.length===0){
-    // hide the full roster until the worker starts typing (privacy + shorter list)
+    // hide the roster until the worker starts typing (privacy + shorter list)
     msg.innerHTML='<div class="muted">Start typing your name to find it.</div>';
     return;
   }
-  const list = WORKERS
+  const list = base
     .filter(w => (w.workerName||'').toLowerCase().includes(term))
     .sort((a,b)=>(a.workerName||'').toLowerCase().localeCompare((b.workerName||'').toLowerCase()));
   if(list.length===0){
