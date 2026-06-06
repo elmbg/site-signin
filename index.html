@@ -138,7 +138,12 @@ const REFRESH_MS = 30 * 60 * 1000;   // silent cache refresh interval
 const RELOAD_MS  = 5000;             // auto reload after success
 
 const params  = new URLSearchParams(location.search);
-const PROJECT = (params.get('p') || '').trim();   // project CODE, e.g. E5100 — no action param
+// ?p= holds the Base64-encoded project code (obfuscation only, NOT security — atob is reversible).
+// QR URLs use the encoded value (e.g. E5100 -> RTUxMDA=). Decode here; flows still receive the plain code.
+// A typed/garbage URL fails atob() -> PROJECT='' -> existing missing-param "scan the QR" state.
+const _raw    = (params.get('p') || '').trim();
+let   PROJECT = '';
+try { PROJECT = _raw ? atob(_raw).trim() : ''; } catch (e) { PROJECT = ''; }
 
 let WORKERS  = [];        // preloaded active-worker cache: [{inductionId, workerName, company, isOnSite}]
 let PROJECT_NAME = PROJECT;// full project name from the lookup flow (falls back to the code)
