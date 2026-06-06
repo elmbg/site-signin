@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Elm Site Sign In / Sign Out</title>
+<!--
+  R04 Digital Site Sign In / Out — confirmed design 2026-06-06.
+  Single QR per project (?p=E5100, no action param). Worker chooses Sign In / Sign Out
+  on the home screen. Full active-worker cache preloaded once on open, filtered locally
+  in JS (no per-keystroke network call). Full page reload after every successful submit.
+  Silent cache refresh every 30 minutes. Black & white only, no emojis.
+  Source of truth: vault. Sam pushes this file to github.com/elmbg/site-signin and pastes
+  the three flow URLs into the CONFIG block below.
+-->
+<style>
+  :root { --black:#000; --white:#fff; --grey:#666; --line:#000; }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+         background:var(--white); color:var(--black); display:flex; flex-direction:column; min-height:100vh; }
+  header { border-bottom:3px solid var(--black); padding:18px 16px; text-align:center; }
+  header .brand { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--grey); }
+  header .site { font-size:20px; font-weight:700; margin-top:4px; }
+  main { flex:1; padding:22px 16px; max-width:560px; width:100%; margin:0 auto; }
+  .screen { display:none; }
+  .screen.active { display:block; }
+  h1 { font-size:24px; margin-bottom:20px; }
+  button { font-size:18px; font-weight:600; width:100%; padding:18px; border:3px solid var(--black);
+           background:var(--white); color:var(--black); cursor:pointer; margin-bottom:14px; }
+  button.primary { background:var(--black); color:var(--white); }
+  button:disabled { opacity:0.35; cursor:not-allowed; }
+  input[type=text] { font-size:20px; width:100%; padding:16px; border:3px solid var(--black); margin-bottom:14px; }
+  .result { padding:16px; border:2px solid var(--black); margin-bottom:10px; cursor:pointer; }
+  .result .name { font-size:18px; font-weight:700; }
+  .result .company { font-size:14px; color:var(--grey); }
+  .detail { border:3px solid var(--black); padding:16px; margin-bottom:18px; }
+  .detail .row { margin-bottom:12px; }
+  .detail .row:last-child { margin-bottom:0; }
+  .detail .label { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); display:block; }
+  .detail .val { font-size:18px; }
+  .decl { display:flex; align-items:flex-start; gap:12px; margin-bottom:18px; font-size:15px; line-height:1.4; }
+  .decl input { width:30px; height:30px; flex:0 0 auto; }
+  .msg { padding:14px; border:2px solid var(--black); margin-bottom:14px; font-size:15px; line-height:1.4; }
+  .success { text-align:center; padding-top:48px; }
+  .success .big { font-size:36px; font-weight:800; margin-bottom:18px; }
+  .success .nm { font-size:22px; margin-bottom:8px; }
+  .muted { color:var(--grey); font-size:15px; }
+  .loading { text-align:center; padding-top:64px; font-size:18px; color:var(--grey); }
+  .errscreen { text-align:center; padding-top:56px; }
+  .errscreen .big { font-size:24px; font-weight:700; margin-bottom:16px; line-height:1.3; }
+  .errscreen p { font-size:16px; line-height:1.45; margin-bottom:22px; }
+  footer { text-align:center; padding:12px; font-size:11px; color:var(--grey); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Elm Building Group</div>
+  <div class="site" id="siteLabel">&hellip;</div>
+</header>
+<main>
+  <!-- Loading (initial cache fetch) -->
+  <section id="s-loading" class="screen loading">Loading site register&hellip;</section>
+
+  <!-- Screen 1 — Home -->
+  <section id="s-home" class="screen">
+    <h1>Site Attendance</h1>
+    <button class="primary" onclick="go('in')">SIGN IN</button>
+    <button onclick="go('out')">SIGN OUT</button>
+  </section>
+
+  <!-- Screen 2 — Name search -->
+  <section id="s-search" class="screen">
+    <h1 id="searchTitle">Find your name</h1>
+    <input type="text" id="searchInput" placeholder="Type your name" autocomplete="off">
+    <div id="searchMsg"></div>
+    <div id="results"></div>
+    <button onclick="home()">Cancel</button>
+  </section>
+
+  <!-- Screen 3 — Confirm (3a Sign In / 3b Sign Out) -->
+  <section id="s-confirm" class="screen">
+    <h1 id="confirmTitle">Confirm</h1>
+    <div class="detail" id="confirmDetail"></div>
+    <div id="declWrap" class="decl">
+      <input type="checkbox" id="declBox" onchange="toggleConfirm()">
+      <label for="declBox">I confirm I have read and understood the site safety rules, the relevant SWMS and my induction requirements, and I am fit for work.</label>
+    </div>
+    <div id="confirmMsg"></div>
+    <button class="primary" id="confirmBtn" onclick="submit()" disabled>Confirm</button>
+    <button onclick="home()">Cancel</button>
+  </section>
+
+  <!-- Screen 4 — Success (auto full page reload after 5s) -->
+  <section id="s-success" class="screen success">
+    <div class="big" id="successBig">Done</div>
+    <div class="nm" id="successName"></div>
+    <div class="muted" id="successDetail"></div>
+    <div style="margin-top:28px"><button class="primary" onclick="location.reload()">Done</button></div>
+  </section>
+
+  <!-- Error screen (project inactive / missing param / network) -->
+  <section id="s-error" class="screen errscreen">
+    <div class="big" id="errBig">Unavailable</div>
+    <p id="errMsg"></p>
+    <div id="errAction"></div>
+  </section>
+</main>
+<footer>R04 Digital Site Attendance Register</footer>
+
+<script>
+/* ===== CONFIG: paste the three flow HTTP POST URLs after building the flows ===== */
+const LOOKUP_URL  = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d4088c9dcc2c4635841029ddd93e4bae/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cHC4bavi1KTpalk9ec9oEJ5BLOLII_A7MiInIGGsWY0";
+const SIGNIN_URL  = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/170c52f5a3b14516b2f3b0062a403597/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PqKp8zVr7BGPK351gFkFyGEODAtSNNZkDSNQmiweeKw";
+const SIGNOUT_URL = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/09b75cc536bb42718ed551fd2387d8f3/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TQ0VJqUWeKxOeQVSNG4SihKLeEihGbXqi-SRgxPsSJU";
+/* ================================================================================ */
+
+const REFRESH_MS = 30 * 60 * 1000;   // silent cache refresh interval
+const RELOAD_MS  = 5000;             // auto reload after success
+
+const params  = new URLSearchParams(location.search);
+const PROJECT = (params.get('p') || '').trim();   // project CODE, e.g. E5100 — no action param
+
+let WORKERS  = [];        // preloaded active-worker cache: [{inductionId, workerName, company}]
+let mode     = 'in';      // 'in' | 'out'
+let selected = null;      // chosen worker object
+
+/* POST as a "simple request" (text/plain) so the browser skips the CORS preflight
+   that Power Automate HTTP triggers cannot answer. */
+async function post(url, payload){
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
+      body: JSON.stringify(payload)
+    });
+    let data = null; try { data = await res.json(); } catch(e){ data = null; }
+    return { ok: res.ok, status: res.status, data };
+  } catch(e){ return { ok:false, status:0, data:null }; }
+}
+
+/* ---- helpers ---- */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtTime(iso){ try { return new Date(iso).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; } }
+function fmtDate(d){ return d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}); }
+
+/* ---- navigation ---- */
+function home(){
+  selected=null;
+  document.getElementById('searchInput').value='';
+  document.getElementById('results').innerHTML='';
+  document.getElementById('searchMsg').innerHTML='';
+  document.getElementById('confirmMsg').innerHTML='';
+  document.getElementById('declBox').checked=false;
+  show('s-home');
+}
+
+function go(m){
+  mode = m;
+  document.getElementById('searchTitle').textContent =
+    (mode==='in' ? 'Sign In — find your name' : 'Sign Out — find your name');
+  document.getElementById('searchInput').value='';
+  show('s-search');
+  renderList('');
+  setTimeout(()=>document.getElementById('searchInput').focus(),50);
+}
+
+/* ---- local cache filter (no network per keystroke) ---- */
+document.getElementById('searchInput').addEventListener('input', function(){
+  renderList(this.value);
+});
+
+function renderList(q){
+  const box = document.getElementById('results');
+  const msg = document.getElementById('searchMsg');
+  box.innerHTML=''; msg.innerHTML='';
+
+  if(WORKERS.length===0){
+    msg.innerHTML='<div class="msg">No inducted workers found for this site. Complete your induction before signing in.</div>';
+    return;
+  }
+  const term = (q||'').trim().toLowerCase();
+  const list = term ? WORKERS.filter(w => (w.workerName||'').toLowerCase().includes(term)) : WORKERS;
+  if(list.length===0){
+    msg.innerHTML='<div class="msg">Name not found — check the spelling or see your site manager.</div>';
+    return;
+  }
+  list.forEach(w=>{
+    const d=document.createElement('div'); d.className='result';
+    d.innerHTML='<div class="name">'+esc(w.workerName)+'</div><div class="company">'+esc(w.company||'')+'</div>';
+    d.onclick=()=>choose(w);
+    box.appendChild(d);
+  });
+}
+
+/* ---- confirm ---- */
+function choose(w){
+  selected=w;
+  document.getElementById('confirmMsg').innerHTML='';
+  const now=new Date();
+  document.getElementById('confirmTitle').textContent = (mode==='in'?'Confirm Sign In':'Confirm Sign Out');
+  document.getElementById('confirmDetail').innerHTML =
+    '<div class="row"><span class="label">Name</span><span class="val">'+esc(w.workerName)+'</span></div>'+
+    '<div class="row"><span class="label">Company</span><span class="val">'+esc(w.company||'')+'</span></div>'+
+    '<div class="row"><span class="label">'+(mode==='in'?'Sign in':'Sign out')+' time</span><span class="val">'+fmtDate(now)+' '+now.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+'</span></div>';
+  const declWrap=document.getElementById('declWrap');
+  const btn=document.getElementById('confirmBtn');
+  if(mode==='in'){
+    declWrap.style.display='flex';
+    document.getElementById('declBox').checked=false;
+    btn.disabled=true; btn.textContent='Confirm Sign In';
+  } else {
+    declWrap.style.display='none';        // sign-out: submit only, no declaration
+    btn.disabled=false; btn.textContent='Confirm Sign Out';
+  }
+  show('s-confirm');
+}
+
+function toggleConfirm(){
+  if(mode==='in'){ document.getElementById('confirmBtn').disabled = !document.getElementById('declBox').checked; }
+}
+
+/* ---- submit ---- */
+async function submit(){
+  const btn=document.getElementById('confirmBtn'); btn.disabled=true; btn.textContent='Please wait…';
+  document.getElementById('confirmMsg').innerHTML='';
+  const ts=new Date().toISOString();
+
+  if(mode==='in'){
+    const r=await post(SIGNIN_URL,{ projectCode:PROJECT, inductionId:selected.inductionId,
+      workerName:selected.workerName, company:selected.company||'', contractorId:(selected.contractorId??null),
+      declaration:true, timestamp:ts });
+    if(r.ok && r.data && r.data.success){
+      succeed('Signed In', selected.workerName, 'at '+fmtTime(ts));
+    } else if(r.status===409){
+      confirmFail('You are already signed in. Please sign out first.');
+    } else { confirmFail('Something went wrong — please try again.'); }
+  } else {
+    const r=await post(SIGNOUT_URL,{ projectCode:PROJECT, inductionId:selected.inductionId, timestamp:ts });
+    if(r.ok && r.data && r.data.success){
+      // sign-in time + hours on site are returned by the flow (not known before the call)
+      const inT = r.data.signInTime ? ('signed in '+fmtTime(r.data.signInTime)) : '';
+      const hrs = (r.data.hoursOnSite!=null && r.data.hoursOnSite!=='') ? (r.data.hoursOnSite+' h on site') : '';
+      const detail = [inT, hrs].filter(Boolean).join(' · ');
+      succeed('Signed Out', selected.workerName, detail);
+    } else if(r.status===404){
+      confirmFail('No open sign-in found for you — see your site manager.');
+    } else { confirmFail('Something went wrong — please try again.'); }
+  }
+}
+
+function succeed(big,name,detail){
+  document.getElementById('successBig').textContent=big;
+  document.getElementById('successName').textContent=name;
+  document.getElementById('successDetail').textContent=detail||'';
+  show('s-success');
+  setTimeout(()=>location.reload(), RELOAD_MS);   // full page reload — fresh cache for next worker
+}
+
+function confirmFail(msg){
+  document.getElementById('confirmMsg').innerHTML='<div class="msg">'+esc(msg)+'</div>';
+  const btn=document.getElementById('confirmBtn');
+  btn.disabled=false; btn.textContent=(mode==='in'?'Confirm Sign In':'Confirm Sign Out');
+}
+
+/* ---- error states ---- */
+function errorScreen(big, msg, retry){
+  document.getElementById('errBig').textContent=big;
+  document.getElementById('errMsg').textContent=msg;
+  const act=document.getElementById('errAction');
+  act.innerHTML = retry ? '<button class="primary" onclick="init()">Try again</button>' : '';
+  show('s-error');
+}
+
+/* ---- cache load + lifecycle ---- */
+async function loadCache(){
+  // returns 'ok' | 'inactive' | 'network'
+  const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
+  if(r.status===0)   return 'network';                 // could not reach the flow
+  if(r.status===404) return 'inactive';                // PROJECT_INACTIVE or unknown project code
+  if(!r.ok || !Array.isArray(r.data)) return 'network';
+  WORKERS = r.data;
+  return 'ok';
+}
+
+async function refreshCache(){
+  // silent — only replace the cache on a clean array; keep the last good copy otherwise
+  const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
+  if(r.ok && Array.isArray(r.data)){ WORKERS = r.data; }
+}
+
+async function init(){
+  document.getElementById('siteLabel').textContent = PROJECT || 'No project';
+
+  if(!PROJECT){
+    errorScreen('Missing site code',
+      'Please scan the site QR code to sign in. Do not type this URL directly.', false);
+    return;
+  }
+
+  show('s-loading');
+  const state = await loadCache();
+  if(state==='inactive'){
+    errorScreen('Site not active',
+      'This site is not currently active. Please contact your site manager.', false);
+    return;
+  }
+  if(state==='network'){
+    errorScreen('Connection problem',
+      'Something went wrong. Please try again or see your site manager.', true);
+    return;
+  }
+  home();   // 'ok' — empty WORKERS is handled on the search screen
+}
+
+// silent background refresh keeps a long-open / shared phone current
+setInterval(refreshCache, REFRESH_MS);
+init();
+</script>
+</body>
+</html>
