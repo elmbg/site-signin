@@ -34,8 +34,8 @@
   h1{ font-size:22px; margin-bottom:20px; font-weight:700; }
   button{ font-family:inherit; font-size:18px; font-weight:600; width:100%; padding:18px; border-radius:14px;
           border:2px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; margin-bottom:14px; }
-  button.gold{ background:linear-gradient(180deg,var(--gold-1),var(--gold-2)); color:#fff; border:1px solid var(--gold-bd);
-               text-shadow:0 1px 1px rgba(0,0,0,.22); box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  button.gold{ background:linear-gradient(180deg,var(--gold-1),var(--gold-2)); color:#fff; border:2px solid var(--black);
+               text-shadow:0 1px 1px rgba(0,0,0,.28); box-shadow:0 2px 5px rgba(0,0,0,.12); }
   button.dark{ background:var(--black); color:#fff; border:1px solid var(--black); box-shadow:0 2px 5px rgba(0,0,0,.12); }
   button.ghost{ background:#fff; color:var(--ink); border:2px solid var(--line); }
   button:disabled{ opacity:.4; cursor:not-allowed; }
@@ -104,7 +104,7 @@
       <label for="declBox">I confirm I have read and understood the site safety rules, the relevant SWMS and my induction requirements, and I am fit for work.</label>
     </div>
     <div id="confirmMsg"></div>
-    <button class="gold" id="confirmBtn" onclick="submit()" disabled>Confirm</button>
+    <button class="dark" id="confirmBtn" onclick="submit()" disabled>Confirm</button>
     <button class="ghost" onclick="home()">Cancel</button>
   </section>
 
@@ -113,7 +113,7 @@
     <div class="big" id="successBig">Done</div>
     <div class="nm" id="successName"></div>
     <div class="muted" id="successDetail"></div>
-    <div style="margin-top:28px"><button class="gold" onclick="location.reload()">Done</button></div>
+    <div style="margin-top:28px"><button class="dark" onclick="location.reload()">Done</button></div>
   </section>
 
   <!-- Error screen (project inactive / missing param / network) -->
@@ -312,7 +312,7 @@ function errorScreen(big, msg, retry){
   document.getElementById('errBig').textContent=big;
   document.getElementById('errMsg').textContent=msg;
   const act=document.getElementById('errAction');
-  act.innerHTML = retry ? '<button class="gold" onclick="init()">Try again</button>' : '';
+  act.innerHTML = retry ? '<button class="dark" onclick="init()">Try again</button>' : '';
   show('s-error');
 }
 
