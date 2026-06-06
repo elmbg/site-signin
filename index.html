@@ -184,7 +184,14 @@ function renderList(q){
     return;
   }
   const term = (q||'').trim().toLowerCase();
-  const list = term ? WORKERS.filter(w => (w.workerName||'').toLowerCase().includes(term)) : WORKERS;
+  if(term.length===0){
+    // hide the full roster until the worker starts typing (privacy + shorter list)
+    msg.innerHTML='<div class="muted">Start typing your name to find it.</div>';
+    return;
+  }
+  const list = WORKERS
+    .filter(w => (w.workerName||'').toLowerCase().includes(term))
+    .sort((a,b)=>(a.workerName||'').toLowerCase().localeCompare((b.workerName||'').toLowerCase()));
   if(list.length===0){
     msg.innerHTML='<div class="msg">Name not found — check the spelling or see your site manager.</div>';
     return;
