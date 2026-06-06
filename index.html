@@ -17,7 +17,7 @@
 <style>
   :root{
     --ink:#1b1b1b; --black:#111; --white:#fff; --grey:#6b6b6b; --line:#dcdcdc; --bg:#f3f3f3;
-    --gold-1:#cdae4a; --gold-2:#b0892a; --gold-bd:#8c6c1e;
+    --gold-1:#C89600; --gold-2:#b08400; --gold-bd:#8c6c1e; --warn:#c8102e;
   }
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   html,body{ height:100%; }
@@ -41,9 +41,10 @@
   button:disabled{ opacity:.4; cursor:not-allowed; }
   .bigbtn{ padding:28px 18px; font-size:23px; font-weight:700; letter-spacing:.5px; margin-bottom:18px; }
   .home-hint{ font-size:15px; color:var(--grey); text-align:center; margin:6px 0 22px; }
-  input[type=text]{ font-family:inherit; font-size:20px; width:100%; padding:16px; border:2px solid var(--line);
+  input[type=text]{ font-family:inherit; font-size:20px; width:100%; padding:16px; border:2px solid var(--black);
                     border-radius:14px; margin-bottom:14px; background:#fff; }
-  input[type=text]:focus{ outline:none; border-color:var(--gold-2); }
+  input[type=text]:focus{ outline:none; border-color:var(--black); }
+  .warn{ color:var(--warn); font-weight:700; text-align:center; font-size:15px; line-height:1.4; margin-top:4px; }
   .result{ padding:15px 16px; border:1px solid var(--line); border-radius:14px; margin-bottom:10px; cursor:pointer; background:#fff; }
   .result .name{ font-size:18px; font-weight:700; }
   .result .company{ font-size:14px; color:var(--grey); margin-top:2px; }
@@ -84,6 +85,7 @@
     <div class="home-hint">Tap to sign in or out of site</div>
     <button class="gold bigbtn" onclick="go('in')">SIGN IN</button>
     <button class="dark bigbtn" onclick="go('out')">SIGN OUT</button>
+    <div class="warn">Your Site Induction must be completed before signing in.</div>
   </section>
 
   <!-- Screen 2 — Name search -->
