@@ -9,64 +9,81 @@
   Single QR per project (?p=E5100, no action param). Worker chooses Sign In / Sign Out
   on the home screen. Full active-worker cache preloaded once on open, filtered locally
   in JS (no per-keystroke network call). Full page reload after every successful submit.
-  Silent cache refresh every 30 minutes. Black & white only, no emojis.
-  Source of truth: vault. Sam pushes this file to github.com/elmbg/site-signin and pastes
-  the three flow URLs into the CONFIG block below.
+  Silent cache refresh every 30 minutes. No emojis. Styled to match the WHS App —
+  Segoe font, gold/black palette, rounded buttons, black header with the Elm logo
+  (elm-logo.png, white lockup). Source of truth: vault. Sam pushes this file +
+  elm-logo.png to github.com/elmbg/site-signin; flow URLs are in the CONFIG block below.
 -->
 <style>
-  :root { --black:#000; --white:#fff; --grey:#666; --line:#000; }
-  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  html,body { height:100%; }
-  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-         background:var(--white); color:var(--black); display:flex; flex-direction:column; min-height:100vh; }
-  header { border-bottom:3px solid var(--black); padding:18px 16px; text-align:center; }
-  header .brand { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--grey); }
-  header .site { font-size:20px; font-weight:700; margin-top:4px; }
-  main { flex:1; padding:22px 16px; max-width:560px; width:100%; margin:0 auto; }
-  .screen { display:none; }
-  .screen.active { display:block; }
-  h1 { font-size:24px; margin-bottom:20px; }
-  button { font-size:18px; font-weight:600; width:100%; padding:18px; border:3px solid var(--black);
-           background:var(--white); color:var(--black); cursor:pointer; margin-bottom:14px; }
-  button.primary { background:var(--black); color:var(--white); }
-  button:disabled { opacity:0.35; cursor:not-allowed; }
-  input[type=text] { font-size:20px; width:100%; padding:16px; border:3px solid var(--black); margin-bottom:14px; }
-  .result { padding:16px; border:2px solid var(--black); margin-bottom:10px; cursor:pointer; }
-  .result .name { font-size:18px; font-weight:700; }
-  .result .company { font-size:14px; color:var(--grey); }
-  .detail { border:3px solid var(--black); padding:16px; margin-bottom:18px; }
-  .detail .row { margin-bottom:12px; }
-  .detail .row:last-child { margin-bottom:0; }
-  .detail .label { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); display:block; }
-  .detail .val { font-size:18px; }
-  .decl { display:flex; align-items:flex-start; gap:12px; margin-bottom:18px; font-size:15px; line-height:1.4; }
-  .decl input { width:30px; height:30px; flex:0 0 auto; }
-  .msg { padding:14px; border:2px solid var(--black); margin-bottom:14px; font-size:15px; line-height:1.4; }
-  .success { text-align:center; padding-top:48px; }
-  .success .big { font-size:36px; font-weight:800; margin-bottom:18px; }
-  .success .nm { font-size:22px; margin-bottom:8px; }
-  .muted { color:var(--grey); font-size:15px; }
-  .loading { text-align:center; padding-top:64px; font-size:18px; color:var(--grey); }
-  .errscreen { text-align:center; padding-top:56px; }
-  .errscreen .big { font-size:24px; font-weight:700; margin-bottom:16px; line-height:1.3; }
-  .errscreen p { font-size:16px; line-height:1.45; margin-bottom:22px; }
-  footer { text-align:center; padding:12px; font-size:11px; color:var(--grey); }
+  :root{
+    --ink:#1b1b1b; --black:#111; --white:#fff; --grey:#6b6b6b; --line:#dcdcdc; --bg:#f3f3f3;
+    --gold-1:#cdae4a; --gold-2:#b0892a; --gold-bd:#8c6c1e;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{ font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
+        background:var(--bg); color:var(--ink); display:flex; flex-direction:column; min-height:100vh; }
+  header{ background:var(--black); color:#fff; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  header .brand{ font-size:18px; font-weight:700; letter-spacing:.2px; }
+  header img.logo{ height:40px; width:auto; display:block; }
+  .projband{ background:#fff; border-bottom:1px solid var(--line); padding:13px 18px; text-align:center; }
+  .projband .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--grey); }
+  .projband .name{ font-size:19px; font-weight:700; margin-top:2px; color:var(--ink); line-height:1.25; }
+  main{ flex:1; padding:22px 16px; max-width:560px; width:100%; margin:0 auto; }
+  .screen{ display:none; } .screen.active{ display:block; }
+  h1{ font-size:22px; margin-bottom:20px; font-weight:700; }
+  button{ font-family:inherit; font-size:18px; font-weight:600; width:100%; padding:18px; border-radius:14px;
+          border:2px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; margin-bottom:14px; }
+  button.gold{ background:linear-gradient(180deg,var(--gold-1),var(--gold-2)); color:#fff; border:1px solid var(--gold-bd);
+               text-shadow:0 1px 1px rgba(0,0,0,.22); box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  button.dark{ background:var(--black); color:#fff; border:1px solid var(--black); box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  button.ghost{ background:#fff; color:var(--ink); border:2px solid var(--line); }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+  .bigbtn{ padding:28px 18px; font-size:23px; font-weight:700; letter-spacing:.5px; margin-bottom:18px; }
+  .home-hint{ font-size:15px; color:var(--grey); text-align:center; margin:6px 0 22px; }
+  input[type=text]{ font-family:inherit; font-size:20px; width:100%; padding:16px; border:2px solid var(--line);
+                    border-radius:14px; margin-bottom:14px; background:#fff; }
+  input[type=text]:focus{ outline:none; border-color:var(--gold-2); }
+  .result{ padding:15px 16px; border:1px solid var(--line); border-radius:14px; margin-bottom:10px; cursor:pointer; background:#fff; }
+  .result .name{ font-size:18px; font-weight:700; }
+  .result .company{ font-size:14px; color:var(--grey); margin-top:2px; }
+  .detail{ border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:18px; background:#fff; }
+  .detail .row{ margin-bottom:12px; } .detail .row:last-child{ margin-bottom:0; }
+  .detail .label{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); display:block; }
+  .detail .val{ font-size:18px; margin-top:1px; }
+  .decl{ display:flex; align-items:flex-start; gap:12px; margin-bottom:18px; font-size:15px; line-height:1.45;
+         background:#fff; border:1px solid var(--line); border-radius:14px; padding:15px; }
+  .decl input{ width:28px; height:28px; flex:0 0 auto; }
+  .msg{ padding:14px; border:1px solid var(--line); border-radius:12px; margin-bottom:14px; font-size:15px; line-height:1.45; background:#fff; }
+  .success{ text-align:center; padding-top:40px; }
+  .success .big{ font-size:34px; font-weight:800; margin-bottom:18px; }
+  .success .nm{ font-size:22px; margin-bottom:8px; font-weight:600; }
+  .muted{ color:var(--grey); font-size:15px; }
+  .loading{ text-align:center; padding-top:64px; font-size:18px; color:var(--grey); }
+  .errscreen{ text-align:center; padding-top:48px; }
+  .errscreen .big{ font-size:24px; font-weight:700; margin-bottom:16px; line-height:1.3; }
+  .errscreen p{ font-size:16px; line-height:1.5; margin-bottom:22px; }
+  footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">Elm Building Group</div>
-  <div class="site" id="siteLabel">&hellip;</div>
+  <div class="brand">Site Sign In / Out</div>
+  <img class="logo" id="elmLogo" src="elm-logo.png" alt="Elm Building Group" onerror="this.style.display='none'">
 </header>
+<div class="projband">
+  <div class="lbl">Project</div>
+  <div class="name" id="siteLabel">&hellip;</div>
+</div>
 <main>
   <!-- Loading (initial cache fetch) -->
   <section id="s-loading" class="screen loading">Loading site register&hellip;</section>
 
   <!-- Screen 1 — Home -->
   <section id="s-home" class="screen">
-    <h1>Site Attendance</h1>
-    <button class="primary" onclick="go('in')">SIGN IN</button>
-    <button onclick="go('out')">SIGN OUT</button>
+    <div class="home-hint">Tap to sign in or out of site</div>
+    <button class="gold bigbtn" onclick="go('in')">SIGN IN</button>
+    <button class="dark bigbtn" onclick="go('out')">SIGN OUT</button>
   </section>
 
   <!-- Screen 2 — Name search -->
@@ -75,7 +92,7 @@
     <input type="text" id="searchInput" placeholder="Type your name" autocomplete="off">
     <div id="searchMsg"></div>
     <div id="results"></div>
-    <button onclick="home()">Cancel</button>
+    <button class="ghost" onclick="home()">Cancel</button>
   </section>
 
   <!-- Screen 3 — Confirm (3a Sign In / 3b Sign Out) -->
@@ -87,8 +104,8 @@
       <label for="declBox">I confirm I have read and understood the site safety rules, the relevant SWMS and my induction requirements, and I am fit for work.</label>
     </div>
     <div id="confirmMsg"></div>
-    <button class="primary" id="confirmBtn" onclick="submit()" disabled>Confirm</button>
-    <button onclick="home()">Cancel</button>
+    <button class="gold" id="confirmBtn" onclick="submit()" disabled>Confirm</button>
+    <button class="ghost" onclick="home()">Cancel</button>
   </section>
 
   <!-- Screen 4 — Success (auto full page reload after 5s) -->
@@ -96,7 +113,7 @@
     <div class="big" id="successBig">Done</div>
     <div class="nm" id="successName"></div>
     <div class="muted" id="successDetail"></div>
-    <div style="margin-top:28px"><button class="primary" onclick="location.reload()">Done</button></div>
+    <div style="margin-top:28px"><button class="gold" onclick="location.reload()">Done</button></div>
   </section>
 
   <!-- Error screen (project inactive / missing param / network) -->
@@ -121,7 +138,8 @@ const RELOAD_MS  = 5000;             // auto reload after success
 const params  = new URLSearchParams(location.search);
 const PROJECT = (params.get('p') || '').trim();   // project CODE, e.g. E5100 — no action param
 
-let WORKERS  = [];        // preloaded active-worker cache: [{inductionId, workerName, company}]
+let WORKERS  = [];        // preloaded active-worker cache: [{inductionId, workerName, company, isOnSite}]
+let PROJECT_NAME = PROJECT;// full project name from the lookup flow (falls back to the code)
 let mode     = 'in';      // 'in' | 'out'
 let selected = null;      // chosen worker object
 
@@ -147,6 +165,13 @@ function show(id){
 function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function fmtTime(iso){ try { return new Date(iso).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; } }
 function fmtDate(d){ return d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}); }
+function setLabel(){ document.getElementById('siteLabel').textContent = PROJECT_NAME || PROJECT || 'No project'; }
+// the lookup flow may return a bare array (old) or { projectName, workers } (new) — handle both
+function readLookup(d){
+  if(Array.isArray(d)) return { workers:d, projectName:null };
+  if(d && Array.isArray(d.workers)) return { workers:d.workers, projectName:d.projectName||null };
+  return { workers:null, projectName:null };
+}
 
 /* ---- navigation ---- */
 function home(){
@@ -287,7 +312,7 @@ function errorScreen(big, msg, retry){
   document.getElementById('errBig').textContent=big;
   document.getElementById('errMsg').textContent=msg;
   const act=document.getElementById('errAction');
-  act.innerHTML = retry ? '<button class="primary" onclick="init()">Try again</button>' : '';
+  act.innerHTML = retry ? '<button class="gold" onclick="init()">Try again</button>' : '';
   show('s-error');
 }
 
@@ -297,19 +322,23 @@ async function loadCache(){
   const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
   if(r.status===0)   return 'network';                 // could not reach the flow
   if(r.status===404) return 'inactive';                // PROJECT_INACTIVE or unknown project code
-  if(!r.ok || !Array.isArray(r.data)) return 'network';
-  WORKERS = r.data;
+  const { workers, projectName } = readLookup(r.data);
+  if(!r.ok || !workers) return 'network';
+  WORKERS = workers;
+  if(projectName){ PROJECT_NAME = projectName; }
+  setLabel();
   return 'ok';
 }
 
 async function refreshCache(){
-  // silent — only replace the cache on a clean array; keep the last good copy otherwise
+  // silent — only replace the cache on a clean result; keep the last good copy otherwise
   const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
-  if(r.ok && Array.isArray(r.data)){ WORKERS = r.data; }
+  const { workers, projectName } = readLookup(r.data);
+  if(r.ok && workers){ WORKERS = workers; if(projectName){ PROJECT_NAME = projectName; setLabel(); } }
 }
 
 async function init(){
-  document.getElementById('siteLabel').textContent = PROJECT || 'No project';
+  setLabel();
 
   if(!PROJECT){
     errorScreen('Missing site code',
