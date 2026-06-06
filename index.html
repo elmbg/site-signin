@@ -190,13 +190,15 @@ function renderList(q){
     return;
   }
   const term = (q||'').trim().toLowerCase();
-  if(term.length===0){
-    // hide the roster until the worker starts typing (privacy + shorter list)
-    msg.innerHTML='<div class="muted">Start typing your name to find it.</div>';
+  if(term.length < 2){
+    // require 2+ letters; hides the roster until then (privacy + shorter list)
+    msg.innerHTML='<div class="muted">Type at least 2 letters of your first or last name.</div>';
     return;
   }
+  // match only the START of a name part (first / middle / last) — not mid-word
   const list = base
-    .filter(w => (w.workerName||'').toLowerCase().includes(term))
+    .filter(w => { const nm=(w.workerName||'').toLowerCase();
+                   return nm.startsWith(term) || nm.split(/\s+/).some(t => t.startsWith(term)); })
     .sort((a,b)=>(a.workerName||'').toLowerCase().localeCompare((b.workerName||'').toLowerCase()));
   if(list.length===0){
     msg.innerHTML='<div class="msg">Name not found — check the spelling or see your site manager.</div>';
