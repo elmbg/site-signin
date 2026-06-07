@@ -585,6 +585,9 @@ async function vSubmit(){
   }
 }
 
+/* escort search — filter the inducted-worker cache locally (mirrors the worker/sign-out inputs) */
+document.getElementById('vEscortInput').addEventListener('input', function(){ vRenderEscort(this.value); });
+
 /* visitor sign out — filter the open-visitor cache locally */
 document.getElementById('vOutInput').addEventListener('input', function(){ vRenderOut(this.value); });
 
