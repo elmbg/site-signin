@@ -13,6 +13,16 @@
   Segoe font, gold/black palette, rounded buttons, black header with the Elm logo
   (elm-logo.png, white lockup). Source of truth: vault. Sam pushes this file +
   elm-logo.png to github.com/elmbg/site-signin; flow URLs are in the CONFIG block below.
+
+  VISITOR MODE — added 2026-06-07 (R04 completion package).
+  Same codebase, two entry points. A second QR poster at the site office opens
+  ?p=<encoded>&mode=visitor → visitor sign in / out against a SEPARATE VisitorRegister
+  list (worker SignInRegister untouched). Visitor sign-in sequence: acknowledgment
+  (Annexure D §3 Visitor Site Rules + evac plan, embedded per project) → details →
+  escort (inducted worker, reuses the worker lookup) → mandatory declaration v1 →
+  create. Muster spans BOTH lists (scrAttendanceList reads both). Design:
+  vault R04_Sign_In_Out/Visitor_Register_Design.md. Visitor flows:
+  vault R04_Sign_In_Out/Visitor_Flow_Build.md.
 -->
 <style>
   :root{
@@ -64,12 +74,20 @@
   .errscreen{ text-align:center; padding-top:48px; }
   .errscreen .big{ font-size:24px; font-weight:700; margin-bottom:16px; line-height:1.3; }
   .errscreen p{ font-size:16px; line-height:1.5; margin-bottom:22px; }
-  footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; }
+  footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; line-height:1.5; }
+  /* visitor mode additions */
+  .fieldlbl{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); display:block; margin:0 2px 4px; }
+  .rules{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:16px; font-size:15px; line-height:1.5; }
+  .rules h2{ font-size:16px; margin:0 0 10px; }
+  .rules ul{ margin:0 0 0 18px; } .rules li{ margin-bottom:7px; }
+  .evac{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; text-align:center; }
+  .evac .cap{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); margin-bottom:10px; }
+  .evac img{ max-width:100%; height:auto; border-radius:8px; border:1px solid var(--line); }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">Site Sign In / Out</div>
+  <div class="brand" id="brand">Site Sign In / Out</div>
   <img class="logo" id="elmLogo" src="elm-logo.png" alt="Elm Building Group" onerror="this.style.display='none'">
 </header>
 <div class="projband">
@@ -79,6 +97,8 @@
 <main>
   <!-- Loading (initial cache fetch) -->
   <section id="s-loading" class="screen loading">Loading site register&hellip;</section>
+
+  <!-- ================= WORKER MODE ================= -->
 
   <!-- Screen 1 — Home -->
   <section id="s-home" class="screen">
@@ -110,6 +130,78 @@
     <button class="ghost" onclick="home()">Cancel</button>
   </section>
 
+  <!-- ================= VISITOR MODE ================= -->
+
+  <!-- V-home -->
+  <section id="s-v-home" class="screen">
+    <div class="home-hint">Visitor sign in / out</div>
+    <button class="gold bigbtn" onclick="vGo('in')">VISITOR SIGN IN</button>
+    <button class="dark bigbtn" onclick="vGo('out')">VISITOR SIGN OUT</button>
+    <div class="warn">All visitors must remain with an inducted escort at all&nbsp;times.</div>
+  </section>
+
+  <!-- V1 — Acknowledgment (Annexure D §3 Visitor Site Rules + evac plan) -->
+  <section id="s-v-ack" class="screen">
+    <h1>Visitor Site Rules</h1>
+    <div class="rules" id="vRules"></div>
+    <div class="evac" id="vEvac">
+      <div class="cap">Site Evacuation Plan</div>
+      <img id="vEvacImg" alt="Site evacuation plan" onerror="document.getElementById('vEvac').style.display='none'">
+    </div>
+    <button class="dark" onclick="vAckContinue()">I have read the site rules — continue</button>
+    <button class="ghost" onclick="vHome()">Cancel</button>
+  </section>
+
+  <!-- V2 — Visitor details -->
+  <section id="s-v-details" class="screen">
+    <h1>Your details</h1>
+    <label class="fieldlbl" for="vFirst">First name</label>
+    <input type="text" id="vFirst" placeholder="First name" autocomplete="off">
+    <label class="fieldlbl" for="vLast">Last name</label>
+    <input type="text" id="vLast" placeholder="Last name" autocomplete="off">
+    <label class="fieldlbl" for="vCompany">Company</label>
+    <input type="text" id="vCompany" placeholder="Company" autocomplete="off">
+    <label class="fieldlbl" for="vReason">Reason for visit</label>
+    <input type="text" id="vReason" placeholder="Reason for visit" autocomplete="off">
+    <div id="vDetailsMsg"></div>
+    <button class="dark" onclick="vDetailsNext()">Next</button>
+    <button class="ghost" onclick="vHome()">Cancel</button>
+  </section>
+
+  <!-- V3 — Escort selection (inducted workers) -->
+  <section id="s-v-escort" class="screen">
+    <h1>Who is escorting you?</h1>
+    <div class="muted" style="margin-bottom:12px">Choose the inducted Elm worker who will escort you on site.</div>
+    <input type="text" id="vEscortInput" placeholder="Type the escort's name" autocomplete="off">
+    <div id="vEscortMsg"></div>
+    <div id="vEscortResults"></div>
+    <button class="ghost" onclick="vHome()">Cancel</button>
+  </section>
+
+  <!-- V4 — Declaration -->
+  <section id="s-v-declare" class="screen">
+    <h1>Visitor declaration</h1>
+    <div class="detail" id="vSummary"></div>
+    <div class="decl">
+      <input type="checkbox" id="vDeclBox" onchange="vToggleSubmit()">
+      <label for="vDeclBox" id="vDeclText"></label>
+    </div>
+    <div id="vDeclMsg"></div>
+    <button class="dark" id="vSubmitBtn" onclick="vSubmit()" disabled>Confirm &amp; sign in</button>
+    <button class="ghost" onclick="vHome()">Cancel</button>
+  </section>
+
+  <!-- V-out — Visitor sign out (list open visitors) -->
+  <section id="s-v-signout" class="screen">
+    <h1>Visitor sign out</h1>
+    <input type="text" id="vOutInput" placeholder="Type your name" autocomplete="off">
+    <div id="vOutMsg"></div>
+    <div id="vOutResults"></div>
+    <button class="ghost" onclick="vHome()">Cancel</button>
+  </section>
+
+  <!-- ================= SHARED ================= -->
+
   <!-- Screen 4 — Success (auto full page reload after 5s) -->
   <section id="s-success" class="screen success">
     <div class="big" id="successBig">Done</div>
@@ -125,14 +217,68 @@
     <div id="errAction"></div>
   </section>
 </main>
-<footer>R04 Digital Site Attendance Register</footer>
+<footer id="appFooter">R04 Digital Site Attendance Register</footer>
 
 <script>
-/* ===== CONFIG: paste the three flow HTTP POST URLs after building the flows ===== */
+/* ===== CONFIG: paste the flow HTTP POST URLs after building the flows ===== */
+/* Worker flows (LIVE — do not change) */
 const LOOKUP_URL  = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d4088c9dcc2c4635841029ddd93e4bae/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=cHC4bavi1KTpalk9ec9oEJ5BLOLII_A7MiInIGGsWY0";
 const SIGNIN_URL  = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/170c52f5a3b14516b2f3b0062a403597/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PqKp8zVr7BGPK351gFkFyGEODAtSNNZkDSNQmiweeKw";
 const SIGNOUT_URL = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/09b75cc536bb42718ed551fd2387d8f3/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TQ0VJqUWeKxOeQVSNG4SihKLeEihGbXqi-SRgxPsSJU";
-/* ================================================================================ */
+/* Visitor flows (PASTE after building ELM-R04-Visitor-* — see Visitor_Flow_Build.md) */
+const VISITOR_LOOKUP_URL  = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b7d79b8fff264126bbeb599c49377dc0/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Af0K1wo5yDuJ--IG5iMSjULlgeVf3ha9sKj_wLe1RS8";
+const VISITOR_CREATE_URL  = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/eccf4612152540a287781efe156b1263/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=bwkTK4KRw_XfikXKdu_Mmpo_g9Q-iR5hgWvicjIVfV8";
+const VISITOR_SIGNOUT_URL = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a35f7714701f4746b0afb6c1b7b55f12/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=kr6iuxaZuPqm-3fpRektp7mpTKHBLasb8TeG9Boozv4";
+/* ========================================================================= */
+
+/* ===== Visitor compliance content (per-project repo maintenance) ===========
+   The visitor DECLARATION (mandatory tick) is below — wording v1, seeded verbatim.
+   The Annexure D §3 Visitor Site Rules are NOT here: they live in a SEPARATE file
+   `visitor-rules.html` in this repo, fetched at load (loadVisitorRules() below).
+   To update the rules: edit visitor-rules.html (text + the data-rules-version),
+   commit + push — no app-code change. SharePoint links can't be used (login wall
+   for unauthenticated visitors), so the rules stay in-repo but in their own file.
+   The evac plan is a per-project image: evac-<PROJECTCODE>.png (e.g. evac-E5100.png).
+   Log Annexure D revisions against CDU-007; review the declaration wording if §3 changes.
+   ----------------------------------------------------------------------------- */
+const DECLARATION_VERSION = "Visitor declaration v1 (2026-06-07)";
+
+/* Visitor declaration — wording v1, SEED EXACTLY, DO NOT REWORD (Visitor_Register_Design.md §2.4) */
+const DECLARATION_TEXT =
+  "I declare that I have read and understood the Visitor Site Rules. I will remain with my inducted " +
+  "escort at all times, wear the minimum PPE required on site (safety footwear and high-visibility " +
+  "clothing), follow all instructions from my escort and Elm Building Group site management including " +
+  "in an emergency, and not enter barrier-controlled areas. I will sign out on departure from site.";
+
+/* Visitor Site Rules — loaded from visitor-rules.html at runtime so they can be edited
+   without touching app code. These are FALLBACKS used only if the fetch fails. */
+let ANNEXURE_D_VERSION = "Annexure D §3 — version TBC";
+let RULES_HTML =
+  "<h2>While on this site you must:</h2>" +
+  "<ul>" +
+  "<li>Remain with your inducted Elm escort at all times.</li>" +
+  "<li>Wear the minimum PPE required on site: safety footwear and high-visibility clothing.</li>" +
+  "<li>Follow all instructions from your escort and Elm Building Group site management, including in an emergency.</li>" +
+  "<li>Not enter barrier-controlled or exclusion areas.</li>" +
+  "<li>Sign out on departure from site.</li>" +
+  "</ul>";
+
+/* Fetch the controlled rules + version from visitor-rules.html (same-origin, no login wall).
+   Updates the RULES_HTML + ANNEXURE_D_VERSION globals; on any failure keeps the fallbacks above. */
+async function loadVisitorRules(){
+  try {
+    const res = await fetch('visitor-rules.html', { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const doc  = new DOMParser().parseFromString(await res.text(), 'text/html');
+    const root = doc.getElementById('rules-root');
+    const body = doc.getElementById('rules-body');
+    if(body && body.innerHTML.trim()) RULES_HTML = body.innerHTML;
+    const v = root && root.getAttribute('data-rules-version');
+    if(v && v.trim()) ANNEXURE_D_VERSION = v.trim();
+  } catch(e){
+    console.warn('visitor-rules.html fetch failed — using fallback rules:', e.message);
+  }
+}
 
 const REFRESH_MS = 30 * 60 * 1000;   // silent cache refresh interval
 const RELOAD_MS  = 5000;             // auto reload after success
@@ -145,10 +291,17 @@ const _raw    = (params.get('p') || '').trim();
 let   PROJECT = '';
 try { PROJECT = _raw ? atob(_raw).trim() : ''; } catch (e) { PROJECT = ''; }
 
+// Visitor mode is selected by &mode=visitor (plain, not encoded — it's not sensitive).
+const MODE = ((params.get('mode') || '').trim().toLowerCase() === 'visitor') ? 'visitor' : 'worker';
+
 let WORKERS  = [];        // preloaded active-worker cache: [{inductionId, workerName, company, isOnSite}]
 let PROJECT_NAME = PROJECT;// full project name from the lookup flow (falls back to the code)
-let mode     = 'in';      // 'in' | 'out'
+let mode     = 'in';      // 'in' | 'out' (worker)
 let selected = null;      // chosen worker object
+
+// visitor state
+let OPEN_VISITORS = [];    // [{visitorId, name, company, signInTime}]
+let vData = { firstName:'', lastName:'', company:'', reason:'', escortName:'', escortInductionId:null };
 
 /* POST as a "simple request" (text/plain) so the browser skips the CORS preflight
    that Power Automate HTTP triggers cannot answer. */
@@ -180,7 +333,7 @@ function readLookup(d){
   return { workers:null, projectName:null };
 }
 
-/* ---- navigation ---- */
+/* ---- navigation (worker) ---- */
 function home(){
   selected=null;
   document.getElementById('searchInput').value='';
@@ -244,7 +397,7 @@ function renderList(q){
   });
 }
 
-/* ---- confirm ---- */
+/* ---- confirm (worker) ---- */
 function choose(w){
   selected=w;
   document.getElementById('confirmMsg').innerHTML='';
@@ -271,7 +424,7 @@ function toggleConfirm(){
   if(mode==='in'){ document.getElementById('confirmBtn').disabled = !document.getElementById('declBox').checked; }
 }
 
-/* ---- submit ---- */
+/* ---- submit (worker) ---- */
 async function submit(){
   const btn=document.getElementById('confirmBtn'); btn.disabled=true; btn.textContent='Please wait…';
   document.getElementById('confirmMsg').innerHTML='';
@@ -314,16 +467,188 @@ function confirmFail(msg){
   btn.disabled=false; btn.textContent=(mode==='in'?'Confirm Sign In':'Confirm Sign Out');
 }
 
+/* ================= VISITOR MODE ================= */
+
+function vHome(){
+  vData = { firstName:'', lastName:'', company:'', reason:'', escortName:'', escortInductionId:null };
+  ['vFirst','vLast','vCompany','vReason','vEscortInput','vOutInput'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['vDetailsMsg','vEscortMsg','vEscortResults','vDeclMsg','vOutMsg','vOutResults'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  const db=document.getElementById('vDeclBox'); if(db) db.checked=false;
+  show('s-v-home');
+}
+
+function vGo(m){
+  if(m==='in'){
+    // start the sign-in sequence at the acknowledgment screen
+    document.getElementById('vRules').innerHTML = RULES_HTML;
+    document.getElementById('vEvacImg').src = 'evac-' + (PROJECT||'') + '.png';
+    document.getElementById('vEvac').style.display = '';   // re-show in case a prior onerror hid it
+    show('s-v-ack');
+  } else {
+    // sign out — list currently on-site visitors
+    document.getElementById('vOutInput').value='';
+    show('s-v-signout');
+    vRenderOut('');
+    setTimeout(()=>document.getElementById('vOutInput').focus(),50);
+  }
+}
+
+function vAckContinue(){
+  document.getElementById('vDetailsMsg').innerHTML='';
+  show('s-v-details');
+  setTimeout(()=>document.getElementById('vFirst').focus(),50);
+}
+
+function vDetailsNext(){
+  const f=document.getElementById('vFirst').value.trim();
+  const l=document.getElementById('vLast').value.trim();
+  const c=document.getElementById('vCompany').value.trim();
+  const rsn=document.getElementById('vReason').value.trim();
+  if(!f || !l || !c || !rsn){
+    document.getElementById('vDetailsMsg').innerHTML='<div class="msg">Please complete all fields before continuing.</div>';
+    return;
+  }
+  vData.firstName=f; vData.lastName=l; vData.company=c; vData.reason=rsn;
+  document.getElementById('vEscortInput').value='';
+  document.getElementById('vEscortMsg').innerHTML='';
+  show('s-v-escort');
+  vRenderEscort('');
+  setTimeout(()=>document.getElementById('vEscortInput').focus(),50);
+}
+
+/* escort = inducted worker (reuses the worker lookup cache WORKERS) */
+function vRenderEscort(q){
+  const box=document.getElementById('vEscortResults');
+  const msg=document.getElementById('vEscortMsg');
+  box.innerHTML=''; msg.innerHTML='';
+  if(WORKERS.length===0){
+    msg.innerHTML='<div class="msg">No inducted workers found for this site. See site management to arrange an escort.</div>';
+    return;
+  }
+  const term=(q||'').trim().toLowerCase();
+  if(term.length < 2){
+    msg.innerHTML='<div class="muted">Type at least 2 letters of your escort’s name.</div>';
+    return;
+  }
+  const list=WORKERS
+    .filter(w=>{ const nm=(w.workerName||'').toLowerCase();
+                 return nm.startsWith(term) || nm.split(/\s+/).some(t=>t.startsWith(term)); })
+    .sort((a,b)=>(a.workerName||'').toLowerCase().localeCompare((b.workerName||'').toLowerCase()));
+  if(list.length===0){
+    msg.innerHTML='<div class="msg">Name not found — check the spelling or see site management.</div>';
+    return;
+  }
+  list.forEach(w=>{
+    const d=document.createElement('div'); d.className='result';
+    d.innerHTML='<div class="name">'+esc(w.workerName)+'</div><div class="company">'+esc(w.company||'')+'</div>';
+    d.onclick=()=>vChooseEscort(w);
+    box.appendChild(d);
+  });
+}
+
+function vChooseEscort(w){
+  vData.escortName = w.workerName;
+  vData.escortInductionId = w.inductionId;   // EscortName is a lookup → Inductions; flow patches by ID
+  // build the declaration screen
+  document.getElementById('vSummary').innerHTML =
+    '<div class="row"><span class="label">Name</span><span class="val">'+esc(vData.firstName+' '+vData.lastName)+'</span></div>'+
+    '<div class="row"><span class="label">Company</span><span class="val">'+esc(vData.company)+'</span></div>'+
+    '<div class="row"><span class="label">Reason for visit</span><span class="val">'+esc(vData.reason)+'</span></div>'+
+    '<div class="row"><span class="label">Escort</span><span class="val">'+esc(vData.escortName)+'</span></div>';
+  document.getElementById('vDeclText').textContent = DECLARATION_TEXT;
+  document.getElementById('vDeclBox').checked=false;
+  document.getElementById('vSubmitBtn').disabled=true;
+  document.getElementById('vDeclMsg').innerHTML='';
+  show('s-v-declare');
+}
+
+function vToggleSubmit(){
+  document.getElementById('vSubmitBtn').disabled = !document.getElementById('vDeclBox').checked;
+}
+
+async function vSubmit(){
+  if(!document.getElementById('vDeclBox').checked) return;   // declaration mandatory
+  const btn=document.getElementById('vSubmitBtn'); btn.disabled=true; btn.textContent='Please wait…';
+  document.getElementById('vDeclMsg').innerHTML='';
+  const ts=new Date().toISOString();
+  const r=await post(VISITOR_CREATE_URL,{
+    projectCode:PROJECT,
+    firstName:vData.firstName, lastName:vData.lastName, company:vData.company,
+    reasonForVisit:vData.reason, escortName:vData.escortName,
+    escortInductionId:vData.escortInductionId,
+    declaration:true, timestamp:ts });
+  if(r.ok && r.data && r.data.success){
+    succeed('Signed In', vData.firstName+' '+vData.lastName, 'Visitor — at '+fmtTime(ts)+' · escort '+vData.escortName);
+  } else {
+    document.getElementById('vDeclMsg').innerHTML='<div class="msg">Something went wrong — please try again or see site management.</div>';
+    btn.disabled=false; btn.textContent='Confirm & sign in';
+  }
+}
+
+/* visitor sign out — filter the open-visitor cache locally */
+document.getElementById('vOutInput').addEventListener('input', function(){ vRenderOut(this.value); });
+
+function vRenderOut(q){
+  const box=document.getElementById('vOutResults');
+  const msg=document.getElementById('vOutMsg');
+  box.innerHTML=''; msg.innerHTML='';
+  if(OPEN_VISITORS.length===0){
+    msg.innerHTML='<div class="msg">No visitors are currently signed in for this site.</div>';
+    return;
+  }
+  const term=(q||'').trim().toLowerCase();
+  if(term.length < 2){
+    msg.innerHTML='<div class="muted">Type at least 2 letters of your name.</div>';
+    return;
+  }
+  const list=OPEN_VISITORS
+    .filter(v=>{ const nm=(v.name||'').toLowerCase();
+                 return nm.startsWith(term) || nm.split(/\s+/).some(t=>t.startsWith(term)); })
+    .sort((a,b)=>(a.name||'').toLowerCase().localeCompare((b.name||'').toLowerCase()));
+  if(list.length===0){
+    msg.innerHTML='<div class="msg">Name not found — see site management to sign out.</div>';
+    return;
+  }
+  list.forEach(v=>{
+    const d=document.createElement('div'); d.className='result';
+    const since = v.signInTime ? ('on site since '+fmtTime(v.signInTime)) : '';
+    d.innerHTML='<div class="name">'+esc(v.name)+'</div><div class="company">'+esc(v.company||'')+(since?(' · '+since):'')+'</div>';
+    d.onclick=()=>vSignOut(v, d);
+    box.appendChild(d);
+  });
+}
+
+async function vSignOut(v, el){
+  // guard against double-tap: disable the row visually
+  document.querySelectorAll('#vOutResults .result').forEach(r=>r.style.pointerEvents='none');
+  document.getElementById('vOutMsg').innerHTML='<div class="muted">Signing out…</div>';
+  const ts=new Date().toISOString();
+  const r=await post(VISITOR_SIGNOUT_URL,{ projectCode:PROJECT, visitorId:v.visitorId, timestamp:ts });
+  if(r.ok && r.data && r.data.success){
+    const inT = r.data.signInTime ? ('signed in '+fmtTime(r.data.signInTime)) : '';
+    const hrs = (r.data.hoursOnSite!=null && r.data.hoursOnSite!=='') ? (r.data.hoursOnSite+' h on site') : '';
+    const detail = ['Visitor', inT, hrs].filter(Boolean).join(' · ');
+    succeed('Signed Out', v.name, detail);
+  } else if(r.status===404){
+    document.getElementById('vOutMsg').innerHTML='<div class="msg">No open visitor sign-in found — see site management.</div>';
+    document.querySelectorAll('#vOutResults .result').forEach(r=>r.style.pointerEvents='auto');
+  } else {
+    document.getElementById('vOutMsg').innerHTML='<div class="msg">Something went wrong — please try again.</div>';
+    document.querySelectorAll('#vOutResults .result').forEach(r=>r.style.pointerEvents='auto');
+  }
+}
+
 /* ---- error states ---- */
 function errorScreen(big, msg, retry){
   document.getElementById('errBig').textContent=big;
   document.getElementById('errMsg').textContent=msg;
   const act=document.getElementById('errAction');
-  act.innerHTML = retry ? '<button class="dark" onclick="init()">Try again</button>' : '';
+  const retryFn = (MODE==='visitor') ? 'vInit()' : 'init()';
+  act.innerHTML = retry ? '<button class="dark" onclick="'+retryFn+'">Try again</button>' : '';
   show('s-error');
 }
 
-/* ---- cache load + lifecycle ---- */
+/* ---- cache load + lifecycle (worker) ---- */
 async function loadCache(){
   // returns 'ok' | 'inactive' | 'network'
   const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
@@ -339,6 +664,7 @@ async function loadCache(){
 
 async function refreshCache(){
   // silent — only replace the cache on a clean result; keep the last good copy otherwise
+  if(MODE==='visitor'){ vRefreshCache(); return; }
   const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
   const { workers, projectName } = readLookup(r.data);
   if(r.ok && workers){ WORKERS = workers; if(projectName){ PROJECT_NAME = projectName; setLabel(); } }
@@ -368,9 +694,54 @@ async function init(){
   home();   // 'ok' — empty WORKERS is handled on the search screen
 }
 
+/* ---- visitor lifecycle ---- */
+function vReadLookup(d){
+  // visitor lookup returns { projectName, openVisitors }
+  if(d && Array.isArray(d.openVisitors)) return { openVisitors:d.openVisitors, projectName:d.projectName||null };
+  if(Array.isArray(d)) return { openVisitors:d, projectName:null };
+  return { openVisitors:null, projectName:null };
+}
+
+async function vRefreshCache(){
+  const r=await post(VISITOR_LOOKUP_URL,{ projectCode:PROJECT });
+  const { openVisitors, projectName } = vReadLookup(r.data);
+  if(r.ok && openVisitors){ OPEN_VISITORS = openVisitors; if(projectName){ PROJECT_NAME=projectName; setLabel(); } }
+}
+
+async function vInit(){
+  // visitor mode chrome
+  document.getElementById('brand').textContent = 'Visitor Sign In / Out';
+  await loadVisitorRules();   // fetch controlled rules + version before painting the footer
+  document.getElementById('appFooter').innerHTML =
+    'R04 Visitor Register &middot; ' + esc(DECLARATION_VERSION) + ' &middot; ' + esc(ANNEXURE_D_VERSION);
+  setLabel();
+
+  if(!PROJECT){
+    errorScreen('Missing site code',
+      'Please scan the visitor QR code to sign in. Do not type this URL directly.', false);
+    return;
+  }
+
+  show('s-loading');
+  // worker lookup gives project-active validation + the escort roster; visitor lookup gives open visitors
+  const wState = await loadCache();          // sets WORKERS (escort roster) + PROJECT_NAME + active check
+  if(wState==='inactive'){
+    errorScreen('Site not active',
+      'This site is not currently active. Please contact site management.', false);
+    return;
+  }
+  if(wState==='network'){
+    errorScreen('Connection problem',
+      'Something went wrong. Please try again or see site management.', true);
+    return;
+  }
+  await vRefreshCache();                      // sets OPEN_VISITORS (for sign-out)
+  vHome();   // 'ok'
+}
+
 // silent background refresh keeps a long-open / shared phone current
 setInterval(refreshCache, REFRESH_MS);
-init();
+if(MODE==='visitor'){ vInit(); } else { init(); }
 </script>
 </body>
 </html>
