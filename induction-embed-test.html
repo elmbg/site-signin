@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  iOS-SAFARI EMBED DE-RISK TEST  —  throwaway spike (2026-06-26)
+  ============================================================================
+  PURPOSE: prove the Cognito Forms SEAMLESS embed of Form 5 (Site Induction
+  Record) works on a real iPhone in Safari — render, prefill, file/camera
+  upload, signature, contiguous scroll, and a real submission — BEFORE
+  investing in the full Phase 1 induction page. This is the one real unknown
+  in the Field Access Layer Phase 1 plan.
+
+  This file is NOT production. Hardcoded to E5100. Delete after the test.
+
+  ---------------------------------------------------------------------------
+  EMBED VALUES (filled 2026-06-26 from Form 5 -> Publish -> Seamless):
+        data-key="eRaSKgtk10WjYk0CGvkT6Q"   (org embed key)
+        data-form="9"                        (Cognito form #9 = Elm "Form 5" Site Induction Record)
+    Prefill: Cognito.prefill({"Project":"4-28"})  (E5100; mirrors hosted ?entry={"Project":"4-28"}).
+  ---------------------------------------------------------------------------
+  VERIFIED SYNTAX (Cognito docs, 2026-06-26):
+    - Seamless embed = <div><script src=".../f/seamless.js" data-key data-form></script></div>
+    - Prefill        = <script>Cognito.prefill({...});</script> directly below
+      (single form on the page). Field names are the INTERNAL names, case-sensitive.
+    - "Project":"4-28" mirrors the PROVEN hosted prefill ?entry={"Project":"4-28"}
+      (4-28 = E5100's Cognito Form 4 entry reference).
+    NOTE: this REPLACES the Cognito.load('forms',{id,entry}) guess in induction.html
+          — that pattern was unverified and is wrong; use seamless.js + prefill().
+  ---------------------------------------------------------------------------
+  DEPLOY: push to the elmbg/site-signin repo, then open on a REAL iPhone:
+    https://elmbg.github.io/site-signin/induction-embed-test.html
+    (must be over HTTPS on a real origin — file:// and desktop won't tell the truth
+     about iOS camera/embed behaviour.)
+  ============================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Site Induction (TEST) — E5100</title>
+  <style>
+    :root { --ink:#1a1a1a; --gold:#C89600; --line:#e3e3e3; }
+    * { box-sizing: border-box; }
+    body {
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      color:var(--ink); line-height:1.5; background:#fff;
+    }
+    .wrap { max-width:680px; margin:0 auto; padding:16px; }
+    .band {
+      background:#111; color:#fff; padding:18px 16px; text-align:center;
+    }
+    .band h1 { margin:0; font-size:18px; letter-spacing:.5px; }
+    .band .proj { color:var(--gold); font-size:15px; margin-top:4px; }
+    .testnote {
+      background:#fff8e1; border:1px solid var(--gold); border-radius:8px;
+      padding:10px 12px; font-size:13px; margin:14px 0;
+    }
+    h2 { font-size:16px; border-bottom:2px solid var(--gold); padding-bottom:6px; }
+    .rules li { margin:6px 0; }
+    img.siteplan {
+      width:100%; height:auto; border:1px solid var(--line); border-radius:8px;
+      display:block; margin:8px 0;
+    }
+    .divider {
+      text-align:center; color:#666; font-size:14px; margin:24px 0 8px;
+      border-top:1px solid var(--line); padding-top:16px;
+    }
+    footer { color:#888; font-size:12px; text-align:center; padding:24px 0; }
+  </style>
+</head>
+<body>
+
+  <div class="band">
+    <h1>SITE INDUCTION</h1>
+    <div class="proj">E5100 Azure Narrabundah ILU's &nbsp;·&nbsp; TEST PAGE</div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="testnote">
+      <strong>iOS Safari de-risk test.</strong> Scroll the whole page as one, then complete &amp;
+      submit the form below. Checklist: <em>iOS_Safari_Embed_Test.md</em>.
+    </div>
+
+    <!-- 1. Simulated site-rules content (stands in for the rules-v2 text the page will fetch) -->
+    <h2>Site Rules</h2>
+    <ul class="rules">
+      <li>All workers must hold a current White Card and be inducted before entering site.</li>
+      <li>PPE (hard hat, hi-vis, steel-cap boots) is mandatory at all times.</li>
+      <li>Sign in on arrival and sign out on departure via the QR poster.</li>
+      <li>In an emergency, proceed to the assembly point shown on the site plan below.</li>
+      <li>Report all incidents and near-misses to the Site Manager immediately.</li>
+    </ul>
+
+    <!-- 2. Evac / site plan image — tests image-above-form contiguous scroll.
+         evac-E5100.png lives in the site-signin repo (web-sized). -->
+    <h2>Site Plan (incl. Evacuation)</h2>
+    <img class="siteplan" src="evac-E5100.png"
+         alt="E5100 site plan including evacuation route and assembly point">
+
+    <div class="divider">↓ Complete your induction below ↓</div>
+
+    <!-- 3. Cognito Form 5 — SEAMLESS embed -->
+    <!-- Replace __DATA_KEY__ and __DATA_FORM__ with the values from
+         Form 5 → Publish → Seamless (see header comment). -->
+    <div id="inductionForm">
+      <script src="https://www.cognitoforms.com/f/seamless.js"
+              data-key="eRaSKgtk10WjYk0CGvkT6Q"
+              data-form="9"></script>
+    </div>
+
+    <!-- Prefill the Project field for E5100 (mirrors the proven hosted prefill {"Project":"4-28"}).
+         Single form on the page -> use Cognito.prefill() directly below the embed. -->
+    <script>
+      Cognito.prefill({ "Project": "4-28" });
+    </script>
+
+    <footer>
+      Elm Building Group · induction embed de-risk test · 2026-06-26 · delete after testing
+    </footer>
+
+  </div>
+</body>
+</html>
