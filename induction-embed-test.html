@@ -4,19 +4,13 @@
   SITE INDUCTION PAGE — CONTENT PREVIEW (graduated from the iOS de-risk test)
   ============================================================================
   De-risk PASSED 2026-06-26 (render + prefill + camera + submit on iOS Safari).
-  This now previews the FULL induction page content: general site rules (from
-  Annexure D Site Safety Rules), then the per-project blocks (team, hours,
-  site-specific rules, site plan) in the order of the current Cognito form,
-  then Form 5 embedded.
+  Rules TIGHTENED 2026-06-26 to concise "cards" (Pier-induction style) instead
+  of long Annexure D prose — bold title + one line each, grouped. Faithful in
+  substance to Annexure D §1; Annexure D remains the controlled source of record.
 
-  HARDCODED to E5100 for preview. At go-live the per-project blocks marked
-  [PER-PROJECT] are populated by the ELM-Induction-Project-Config flow from the
-  Projects Register (which already holds WorkingHours + SiteSpecificRules + SM/PM).
-
-  GENERAL RULES = faithful, phone-readable rendering of Annexure D §1.0 Site
-  Safety Rules + the Safety Breaches list. Annexure D remains the controlled
-  source of record. ⚑ Sam: confirm the rules text is faithful + set the version
-  stamp (RULES_VERSION below) from Annexure D's controlled revision.
+  HARDCODED to E5100 for preview. [PER PROJECT] blocks come from the
+  ELM-Induction-Project-Config flow (Projects Register) at go-live.
+  ⚑ Sam: confirm rules fidelity + set RULES_VERSION from Annexure D's revision.
 
   Embed: seamless.js + Cognito.prefill (verified). data-key/data-form = Form 5.
   ============================================================================
@@ -30,29 +24,35 @@
     :root { --ink:#1a1a1a; --gold:#C89600; --line:#e3e3e3; --muted:#555; }
     * { box-sizing:border-box; }
     body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-           color:var(--ink); line-height:1.5; background:#fff; }
+           color:var(--ink); line-height:1.45; background:#fff; }
     .wrap { max-width:680px; margin:0 auto; padding:16px; }
     .band { background:#111; color:#fff; padding:18px 16px; text-align:center; }
     .band h1 { margin:0; font-size:18px; letter-spacing:.5px; }
     .band .proj { color:var(--gold); font-size:15px; margin-top:4px; }
     .intro { font-size:14px; color:var(--muted); margin:14px 0; }
-    h2 { font-size:16px; border-bottom:2px solid var(--gold); padding-bottom:6px; margin-top:28px; }
-    h3 { font-size:14px; margin:16px 0 4px; color:#000; }
-    ul { margin:6px 0 6px 0; padding-left:20px; }
-    li { margin:5px 0; }
+    h2 { font-size:16px; border-bottom:2px solid var(--gold); padding-bottom:6px; margin-top:26px; }
+    h3 { font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--gold);
+         margin:18px 0 6px; }
     .ver { font-size:12px; color:var(--muted); font-style:italic; margin-top:2px; }
     .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px;
            color:var(--gold); border:1px solid var(--gold); border-radius:4px; padding:1px 5px;
            vertical-align:middle; margin-left:6px; }
-    .team div { margin:6px 0; }
-    .team .name { font-weight:700; }
+    /* Concise rule cards (Pier style) */
+    .grid { display:grid; grid-template-columns:1fr; gap:8px; margin:6px 0; }
+    @media (min-width:520px){ .grid { grid-template-columns:1fr 1fr; } }
+    .card { border:1px solid var(--line); border-left:3px solid var(--gold);
+            border-radius:6px; padding:8px 10px; }
+    .card b { display:block; font-size:13.5px; margin-bottom:1px; }
+    .card span { font-size:12.5px; color:#333; }
+    .team div { margin:6px 0; } .team .name { font-weight:700; }
     .hours div, .specific li { font-weight:600; }
+    ul.specific { margin:6px 0; padding-left:20px; } ul.specific li { margin:5px 0; }
     img.siteplan { width:100%; height:auto; border:1px solid var(--line); border-radius:8px;
                    display:block; margin:8px 0; }
     .divider { text-align:center; color:#666; font-size:15px; font-weight:600; margin:28px 0 8px;
                border-top:1px solid var(--line); padding-top:18px; }
+    .breach { border-left-color:#c0392b !important; }
     footer { color:#888; font-size:12px; text-align:center; padding:24px 0; }
-    /* Keep embedded form inputs >=16px so iOS doesn't focus-zoom (inline-DOM case). */
     #inductionForm input, #inductionForm select, #inductionForm textarea,
     .cognito input, .cognito select, .cognito textarea { font-size:16px !important; }
   </style>
@@ -69,111 +69,58 @@
     <p class="intro">Read the site safety rules and project information below, then complete and
       submit your induction at the bottom of this page. You must be inducted before entering site.</p>
 
-    <!-- ===================== GENERAL SITE SAFETY RULES (Annexure D §1) ===================== -->
+    <!-- ===================== GENERAL SITE SAFETY RULES (concise) ===================== -->
     <h2>Site Safety Rules</h2>
     <div class="ver">Elm Building Group — Annexure D Site Safety Rules · Version: &lt;&lt;CONFIRM-RULES-VERSION&gt;&gt;</div>
-    <p style="font-size:14px;">These general rules apply to every person who enters this work site.</p>
 
-    <h3>Personal Protective Equipment (PPE)</h3>
-    <ul>
-      <li>Hard hats (AS 1801) worn at all times on site, unless a documented risk assessment alters this.</li>
-      <li>High-visibility clothing worn at all times on site.</li>
-      <li>Approved safety footwear appropriate to the task.</li>
-      <li>It is each person's responsibility to use and maintain the correct PPE, tools and equipment.</li>
-      <li>Loose clothing, loose hair and jewellery must not be worn while working.</li>
-    </ul>
+    <h3>Mandatory PPE</h3>
+    <div class="grid">
+      <div class="card"><b>Hard Hats</b><span>Worn while working on site (AS 1801).</span></div>
+      <div class="card"><b>Hi-Vis Clothing</b><span>Worn at all times on site.</span></div>
+      <div class="card"><b>Safety Boots</b><span>Approved steel-cap footwear for the task.</span></div>
+      <div class="card"><b>Task PPE</b><span>Eye, hearing and other PPE as required by SWMS/signage.</span></div>
+      <div class="card"><b>Sun Safety</b><span>No singlets. Apply 30+ sunscreen every 2 hours.</span></div>
+    </div>
 
-    <h3>Sun Safety</h3>
-    <ul>
-      <li>Practise sun safety outdoors. Singlets are not permitted. Apply 30+ broad-spectrum sunscreen every 2 hours.</li>
-    </ul>
+    <h3>Conduct</h3>
+    <div class="grid">
+      <div class="card"><b>Drugs &amp; Alcohol</b><span>None on site — anyone affected is removed.</span></div>
+      <div class="card"><b>Smoking</b><span>Smoke-free zones; not in offices, sheds or amenities.</span></div>
+      <div class="card"><b>Behaviour</b><span>No conduct that risks safety or harasses others.</span></div>
+      <div class="card"><b>Fatigue</b><span>Keep to normal hours and breaks; raise any concerns.</span></div>
+      <div class="card"><b>Prohibited</b><span>No animals, personal radios/headphones, or under-18s (except approved apprentices).</span></div>
+    </div>
 
-    <h3>Conduct &amp; Work Practice</h3>
-    <ul>
-      <li>Work to ensure your own and others' health and safety. No behaviour likely to cause incident or injury, and none that offends, upsets or harasses the client, public or other workers.</li>
-      <li>Comply with WHS legislation, codes of practice, the Elm Building Group PMP, manufacturers' instructions, approved SWMS, and all lawful supervisor instructions.</li>
-    </ul>
+    <h3>Hazards, Injuries &amp; Emergency</h3>
+    <div class="grid">
+      <div class="card"><b>Report Hazards</b><span>Report unsafe conditions to your supervisor/Site Manager immediately.</span></div>
+      <div class="card"><b>Injuries</b><span>Report to First Aid and log in the injury register.</span></div>
+      <div class="card"><b>Emergency</b><span>Know the alarm and assembly point — see the site plan below.</span></div>
+      <div class="card"><b>Safety Signs</b><span>Obey all signs; never remove or damage them.</span></div>
+    </div>
 
-    <h3>Drugs, Alcohol, Smoking &amp; Prohibited Items</h3>
-    <ul>
-      <li>No drugs or alcohol on site — anyone appearing under the influence will be removed.</li>
-      <li>Observe smoke-free zones; no smoking in offices, sheds or amenities.</li>
-      <li>No animals on site at any time.</li>
-      <li>No personal headphones/radios; AM/FM radios only at the Site Manager's discretion.</li>
-      <li>No persons under 18 unless on a formal apprenticeship or approved work experience.</li>
-    </ul>
+    <h3>On-Site Operations</h3>
+    <div class="grid">
+      <div class="card"><b>Sign On / Off</b><span>Scan the QR poster every time. Be inducted + SWMS-signed before access.</span></div>
+      <div class="card"><b>SWMS</b><span>Mandatory for high-risk work — sign into your SWMS before starting.</span></div>
+      <div class="card"><b>Electrical</b><span>RCDs tested daily; leads off the ground; test &amp; tag current; max 30 m lead run.</span></div>
+      <div class="card"><b>Permits</b><span>Required for high-risk tasks (isolation, confined space, hot works, excavation, etc.) — supervisor arranges.</span></div>
+      <div class="card"><b>Movement &amp; Access</b><span>Use designated walkways; beware mobile plant; don't enter barricaded areas.</span></div>
+      <div class="card"><b>Parking</b><span>Only by arrangement with Site Management; park per ACT road rules.</span></div>
+      <div class="card"><b>Heights &amp; Falling Objects</b><span>Protect work at height; secure tools/materials; toe boards on scaffold.</span></div>
+      <div class="card"><b>Chemicals</b><span>An SDS for every chemical; work to the SWMS and SDS.</span></div>
+      <div class="card"><b>Housekeeping</b><span>Clean up progressively; store in designated areas; keep walkways clear.</span></div>
+      <div class="card"><b>Visitors</b><span>Report to the site office, sign in, and stay escorted by an inducted person.</span></div>
+    </div>
 
-    <h3>Hazards, Injuries &amp; Reporting</h3>
-    <ul>
-      <li>If an unsafe condition needs urgent attention, correct it if safe to do so; otherwise make it as safe as possible and report it immediately.</li>
-      <li>Report all unsafe conditions or practices to your supervisor or the Elm PM/Site Manager. Use the Site Daily Notice Board to communicate hazards.</li>
-      <li>Report all injuries to the First Aid Facility and log them in the project Register of Injuries (failure to notify may affect your workers' compensation cover).</li>
-    </ul>
-
-    <h3>Emergency &amp; Evacuation</h3>
-    <ul>
-      <li>Know the site emergency procedures. Familiarise yourself with the assembly area and evacuation system — see the Site Plan below. Each person must know the evacuation signal and assembly point.</li>
-    </ul>
-
-    <h3>Electrical</h3>
-    <ul>
-      <li>Electrical isolation and energisation permits are in use on this site.</li>
-      <li>RCDs MUST be used — push-button tested daily. Keep leads on stands/hooks — no leads on the ground. Maximum 30 m from the temporary distribution board to the tool. Testing and tagging must be current.</li>
-    </ul>
-
-    <h3>Fatigue</h3>
-    <ul>
-      <li>Maintain normal hours and breaks to avoid fatigue. Inform your supervisor or the Elm PM/Site Manager of any fatigue concerns.</li>
-    </ul>
-
-    <h3>Site Access, Parking &amp; Movement</h3>
-    <ul>
-      <li>Vehicles on site only by prior arrangement with Site Management; park per ACT road rules. Elm accepts no responsibility for subcontractor vehicles.</li>
-      <li>Use designated, clearly defined access; emergency access is per the Emergency Evacuation Plan.</li>
-      <li>Use designated walkways. Do not leave site without informing your supervisor (you may need to be accounted for in an emergency). Beware mobile plant, cranes and vehicles; obey dogman/rigger/operator directions; do not enter barrier-controlled areas unless authorised.</li>
-    </ul>
-
-    <h3>Housekeeping &amp; Signs</h3>
-    <ul>
-      <li>Keep the site clean and free of waste; store materials safely in designated locations; keep all exits, walkways and stairwells clear.</li>
-      <li>Observe all safety signs. Do not remove, shift or destroy any warning sign without Elm authorisation; report accidental removal immediately.</li>
-    </ul>
-
-    <h3>Working at Heights &amp; Falling Objects</h3>
-    <ul>
-      <li>Wear a hard hat in hard-hat areas; stay clear of no-go areas and slung/lifted loads; secure loose materials; do not stack near unmeshed guardrails or edges; use tool lanyards at height; ensure scaffold toe boards are in place; isolate areas below work areas.</li>
-    </ul>
-
-    <h3>Hazardous Substances &amp; Chemicals</h3>
-    <ul>
-      <li>Always refer to the SDS and work in accordance with the approved SWMS and applicable SDS.</li>
-      <li>All chemicals must have an SDS; containers clearly marked with contents and safe-handling procedures; store per manufacturer/SDS; liaise with Site Management on storage.</li>
-    </ul>
-
-    <h3>Specific Activities</h3>
-    <ul>
-      <li>Core cutting / excavating: obtain Elm permission before starting and comply with any conditions.</li>
-      <li>Compressed air: do not skylark or use it to blow dust from hands, hair or clothing.</li>
-      <li>Ladders: platform ladders only — a ladder risk assessment is required if a platform ladder is not practicable.</li>
-    </ul>
-
-    <h3>Visitors &amp; Public Protection</h3>
-    <ul>
-      <li>Visitors report to the site office, sign the visitors register, and are accompanied at all times by an inducted person.</li>
-      <li>The public is protected by perimeter fencing/hoarding, barricades/para-webbing and signage as the PM/Site Manager deems necessary.</li>
-      <li>Report any security concerns to Site Management; gates are locked after hours (Elm management holds the only keys).</li>
-    </ul>
-
-    <h3>Safety Breaches — immediate removal</h3>
-    <p style="font-size:14px;">Any person found in breach of the following may be removed from site without warning:</p>
-    <ul>
-      <li>Removing handrails, guardrails, barricades or fences without authority; fighting or violence; bullying or pranks; refusing to comply with safety instructions; interfering with, damaging or vandalising safety equipment or amenities; attending under the influence of drugs or alcohol; racial vilification; sexual harassment; urinating or defecating outside the toilets provided; theft.</li>
-    </ul>
-    <p style="font-size:14px;">Minor non-conformance follows a warning system: 1) Verbal warning → 2) Written warning (Safety Improvement Notice) → 3) Removal from site. Any serious breach results in immediate removal and may result in prosecution.</p>
+    <h3>Safety Breaches</h3>
+    <div class="grid">
+      <div class="card breach"><b>Immediate removal</b><span>Removing safety equipment, fighting, drugs/alcohol, theft, harassment, vandalism or similar may result in immediate removal and possible prosecution.</span></div>
+      <div class="card breach"><b>Warning system</b><span>Minor breaches: verbal warning → written warning → removal from site.</span></div>
+    </div>
 
     <!-- ===================== PER-PROJECT BLOCKS ===================== -->
-    <!-- [PER-PROJECT] At go-live these come from ELM-Induction-Project-Config (Projects Register).
-         Hardcoded to E5100 for this preview. -->
+    <!-- [PER PROJECT] from ELM-Induction-Project-Config (Projects Register) at go-live. E5100 preview. -->
 
     <h2>Your Site Team <span class="tag">PER PROJECT</span></h2>
     <div class="team">
@@ -207,8 +154,6 @@
               data-form="9"></script>
     </div>
 
-    <!-- Prefill Project for E5100 (proven). RulesVersion prefill is commented until the
-         Cognito text field exists + the Cognito->SP flow pulls it (go-live task). -->
     <script>
       Cognito.prefill({
         "Project": "4-28"
@@ -216,8 +161,6 @@
       });
     </script>
 
-    <!-- iOS focus-zoom guard: lock scale only while a field is focused; restore on blur
-         (shadow-DOM safe via document-level focusin/out). -->
     <script>
       (function () {
         var vp = document.getElementById('vp');
