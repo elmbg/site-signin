@@ -38,6 +38,7 @@
   button{ font-family:inherit; font-size:18px; font-weight:600; width:100%; padding:18px; border-radius:14px;
           border:2px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; margin-bottom:14px; }
   button.dark{ background:var(--black); color:#fff; border:1px solid var(--black); box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  button.ghost{ background:#fff; color:var(--ink); border:2px solid var(--line); }
   .rules{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:16px; font-size:15px; line-height:1.5; }
   .rules h2{ font-size:16px; margin:14px 0 8px; } .rules h2:first-child{ margin-top:0; }
   .rules ul{ margin:0 0 0 18px; } .rules li{ margin-bottom:7px; }
@@ -49,7 +50,7 @@
   .evac img{ max-width:100%; height:auto; border-radius:8px; border:1px solid var(--line); }
   strong{ font-weight:700; }
   footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; line-height:1.5; }
-  #formWrap{ display:none; }
+  #formScreen{ display:none; }
 </style>
 </head>
 <body>
@@ -64,6 +65,7 @@
 
 <main>
 
+  <div id="rulesScreen">
   <p class="intro">Read the site safety rules and project information below, then tap
     <strong>I have read the site rules</strong> to complete your induction. You must be inducted before entering site.</p>
 
@@ -144,12 +146,14 @@
          onerror="this.parentNode.querySelector('.cap').textContent='Site plan unavailable — ask the Site Manager to show you the assembly point.';this.style.display='none';">
   </div>
 
-  <!-- Acknowledgment gate — reveals + loads the induction form (formal declaration is inside Form 5) -->
+  <!-- Acknowledgment gate — switches to the form screen (formal declaration is inside Form 5) -->
   <button class="dark" id="ackBtn" onclick="loadForm()">I have read the site rules — continue</button>
+  </div><!-- /rulesScreen -->
 
-  <!-- ===================== INDUCTION FORM (Cognito Form 5) ===================== -->
-  <div id="formWrap">
-    <h1>Complete your induction</h1>
+  <!-- ===================== INDUCTION FORM SCREEN (Cognito Form 5) ===================== -->
+  <div id="formScreen">
+    <button class="ghost" onclick="backToRules()" style="margin-bottom:18px;">&larr; Back to site rules</button>
+    <h1 style="margin-top:0;">Complete your induction</h1>
     <div id="inductionForm"></div>
   </div>
 
@@ -161,10 +165,10 @@
      The binding declaration remains a tick INSIDE Form 5 (attestation rule). */
   var formLoaded = false;
   function loadForm(){
-    if(formLoaded) return; formLoaded = true;
-    document.getElementById('ackBtn').style.display = 'none';
-    var wrap = document.getElementById('formWrap');
-    wrap.style.display = 'block';
+    document.getElementById('rulesScreen').style.display = 'none';
+    document.getElementById('formScreen').style.display = 'block';
+    window.scrollTo(0, 0);
+    if(formLoaded) return; formLoaded = true;   // load the embed once
     var s = document.createElement('script');
     s.src = 'https://www.cognitoforms.com/f/seamless.js';
     s.setAttribute('data-key', 'eRaSKgtk10WjYk0CGvkT6Q');
@@ -173,7 +177,11 @@
       try { Cognito.prefill({ "Project": "4-28" }); } catch(e){ /* prefill best-effort */ }
     };
     document.getElementById('inductionForm').appendChild(s);
-    wrap.scrollIntoView({ behavior:'smooth' });
+  }
+  function backToRules(){
+    document.getElementById('formScreen').style.display = 'none';
+    document.getElementById('rulesScreen').style.display = 'block';
+    window.scrollTo(0, 0);
   }
 </script>
 </body>
