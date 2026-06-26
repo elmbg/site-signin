@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!--
+  SITE INDUCTION PAGE — Field Access Layer Phase 1  (GO-LIVE / PRODUCTION 2026-06-26)
+  ▶ Production page, promoted from induction-embed-test.html. Supersedes the old stub
+    (wrong Cognito.load + obsolete &e= contract). URL contract = ?p=<Base64 ProjectCode>
+    ONLY; the Cognito entry ref comes from the config flow's cognitoEntryRef, not &e=.
+  Styled to MATCH index.html exactly. Generic site rules (Annexure D §1) are static,
+  read-gated sections; the PER-PROJECT blocks (site team, working hours, site rules,
+  site plan) are fetched at load from ELM-Induction-Project-Config off the Projects
+  Register, keyed on ?p= (Base64 of ProjectCode — same scheme as index.html).
+  Read-gate: every section checkbox (.sack) must be ticked → Continue enables → swaps
+  to the form screen and loads the Cognito Form 5 seamless embed, prefilled with the
+  per-project Cognito entry ref + RulesVersion.
+
+  ⚑ The page ticks are a READ-GATE only. The binding acknowledgment must be worker-
+     ticked INSIDE Form 5 (attestation rule, 2026-06-08). Never prefill a declaration.
+  ⚑ Evac/site-plan image = repo file  evac-<ProjectCode>.png  (same as the visitor
+     page); onerror falls back to "ask the SM". No flow round-trip for the image.
+  ⚑ Source of truth = vault R04_Sign_In_Out/webapp/. Deploy this file to elmbg/site-signin
+     as induction.html. Requires evac-<ProjectCode>.png + elm-logo.png in the repo.
+  Build brief: R04_Sign_In_Out/Induction_Phase1_Build_Brief.md.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Site Induction</title>
+<style>
+  :root{
+    --ink:#1b1b1b; --black:#111; --white:#fff; --grey:#6b6b6b; --line:#dcdcdc; --bg:#f3f3f3;
+    --gold-1:#C89600; --gold-2:#b08400; --gold-bd:#8c6c1e; --warn:#c8102e;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{ font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
+        background:var(--bg); color:var(--ink); display:flex; flex-direction:column; min-height:100vh; }
+  header{ background:var(--black); color:#fff; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  header .brand{ font-size:18px; font-weight:700; letter-spacing:.2px; }
+  header img.logo{ height:40px; width:auto; display:block; }
+  .projband{ background:#fff; border-bottom:1px solid var(--line); padding:13px 18px; text-align:center; }
+  .projband .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--grey); }
+  .projband .name{ font-size:19px; font-weight:700; margin-top:2px; color:var(--ink); line-height:1.25; }
+  main{ flex:1; padding:22px 16px; max-width:560px; width:100%; margin:0 auto; }
+  .screen{ display:none; } .screen.active{ display:block; }
+  h1{ font-size:22px; margin:24px 0 12px; font-weight:700; }
+  h1:first-of-type{ margin-top:4px; }
+  .intro{ font-size:15px; color:var(--grey); line-height:1.5; margin-bottom:4px; }
+  button{ font-family:inherit; font-size:18px; font-weight:600; width:100%; padding:18px; border-radius:14px;
+          border:2px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; margin-bottom:14px; }
+  button.dark{ background:var(--black); color:#fff; border:1px solid var(--black); box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  button.ghost{ background:#fff; color:var(--ink); border:2px solid var(--line); }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+  .rules{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:16px; font-size:15px; line-height:1.5; }
+  .rules ul{ margin:0 0 0 18px; } .rules li{ margin-bottom:7px; }
+  .rules .kv{ margin-bottom:8px; } .rules .kv:last-child{ margin-bottom:0; }
+  .evac{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; text-align:center; }
+  .evac .cap{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); margin-bottom:10px; }
+  .evac img{ max-width:100%; height:auto; border-radius:8px; border:1px solid var(--line); }
+  .ackrow{ display:flex; align-items:center; gap:11px; margin-top:14px; padding-top:12px;
+           border-top:1px solid var(--line); font-weight:600; font-size:14px; }
+  .ackrow input{ width:24px; height:24px; flex:0 0 auto; }
+  .gatehint{ font-size:13px; color:var(--grey); text-align:center; margin:2px 0 14px; }
+  .loading{ text-align:center; padding-top:64px; font-size:18px; color:var(--grey); }
+  .errscreen{ text-align:center; padding-top:48px; }
+  .errscreen .big{ font-size:24px; font-weight:700; margin-bottom:16px; line-height:1.3; }
+  .errscreen p{ font-size:16px; line-height:1.5; margin-bottom:22px; }
+  strong{ font-weight:700; }
+  footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; line-height:1.5; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Site Induction</div>
+  <img class="logo" src="elm-logo.png" alt="Elm Building Group" onerror="this.style.display='none'">
+</header>
+<div class="projband">
+  <div class="lbl">Project</div>
+  <div class="name" id="siteLabel">&hellip;</div>
+</div>
+
+<main>
+
+  <!-- Loading (per-project config fetch) -->
+  <section id="s-loading" class="screen loading active">Loading site induction&hellip;</section>
+
+  <!-- ===================== RULES SCREEN ===================== -->
+  <section id="s-rules" class="screen">
+  <p class="intro">Read each section below and tick to confirm you understand it. When all sections are
+    ticked you can continue to complete your induction. You must be inducted before entering site.</p>
+
+  <h1>Mandatory PPE</h1>
+  <div class="rules">
+    <ul>
+      <li><strong>Hi-Vis Clothing</strong> &ndash; worn at all times on site.</li>
+      <li><strong>Safety Boots</strong> &ndash; approved steel-cap footwear for the task.</li>
+      <li><strong>Hard Hats</strong> &ndash; worn during overhead work (cranes, concrete pumps, lifting operations) and wherever signed.</li>
+      <li><strong>Task-Specific PPE</strong> &ndash; eye, hearing and other PPE as required by your SWMS or site signage.</li>
+      <li><strong>Sun Safety</strong> &ndash; no singlets; apply 30+ sunscreen every 2 hours.</li>
+    </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
+
+  <h1>Conduct</h1>
+  <div class="rules">
+    <ul>
+      <li><strong>Drugs &amp; Alcohol</strong> &ndash; none on site; anyone affected will be removed.</li>
+      <li><strong>Smoking</strong> &ndash; in designated areas only; not in offices, sheds or amenities.</li>
+      <li><strong>Behaviour</strong> &ndash; no conduct that risks safety or harasses others.</li>
+      <li><strong>Fatigue</strong> &ndash; keep to normal hours and breaks; raise any concerns.</li>
+      <li><strong>Prohibited</strong> &ndash; no animals, personal headphones/radios, or under-18s (except approved apprentices).</li>
+    </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
+
+  <h1>Hazards, Injuries &amp; Emergency</h1>
+  <div class="rules">
+    <ul>
+      <li><strong>Report Hazards</strong> &ndash; report unsafe conditions to your supervisor or Site Manager immediately.</li>
+      <li><strong>Injuries</strong> &ndash; report to First Aid and log in the injury register.</li>
+      <li><strong>Emergency</strong> &ndash; know the alarm and assembly point (see the site plan below).</li>
+      <li><strong>Safety Signs</strong> &ndash; obey all signs; never remove or damage them.</li>
+    </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
+
+  <h1>On-Site Operations</h1>
+  <div class="rules">
+    <ul>
+      <li><strong>Sign On / Off</strong> &ndash; scan the QR poster every time you enter and leave site.</li>
+      <li><strong>SWMS</strong> &ndash; sign into your SWMS before any high-risk work.</li>
+      <li><strong>Electrical</strong> &ndash; RCDs tested daily; leads off the ground; test &amp; tag current; max 30 m lead run.</li>
+      <li><strong>Permits</strong> &ndash; high-risk tasks (electrical isolation, confined space, hot works, excavation, etc.) need a permit &mdash; your supervisor arranges it.</li>
+      <li><strong>Movement &amp; Access</strong> &ndash; use designated walkways; beware mobile plant; do not enter barricaded areas.</li>
+      <li><strong>Parking</strong> &ndash; only by arrangement with Site Management; park per ACT road rules.</li>
+      <li><strong>Heights &amp; Falling Objects</strong> &ndash; protect work at height; secure tools and materials; toe boards on scaffold.</li>
+      <li><strong>Chemicals</strong> &ndash; an SDS for every chemical; work to the SWMS and SDS.</li>
+      <li><strong>Housekeeping</strong> &ndash; clean up as you go; store in designated areas; keep walkways clear.</li>
+      <li><strong>Visitors</strong> &ndash; report to the site office, sign in, and stay escorted by an inducted person.</li>
+    </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
+
+  <h1>Safety Breaches</h1>
+  <div class="rules">
+    <ul>
+      <li><strong>Immediate removal</strong> &ndash; tampering with safety equipment, fighting, drugs or alcohol, theft, harassment or vandalism may result in immediate removal and possible prosecution.</li>
+      <li><strong>Warning system</strong> &ndash; minor breaches: verbal warning &rarr; written warning &rarr; removal from site.</li>
+    </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
+
+  <!-- ===================== PER-PROJECT BLOCKS (injected from ELM-Induction-Project-Config) ===================== -->
+  <div id="perProject"></div>
+
+  <div class="gatehint" id="gateHint">Tick every section above to continue.</div>
+  <button class="dark" id="ackBtn" onclick="loadForm()" disabled>I have read the site rules — continue</button>
+  </section><!-- /s-rules -->
+
+  <!-- ===================== INDUCTION FORM SCREEN (Cognito Form 5) ===================== -->
+  <section id="s-form" class="screen">
+    <button class="ghost" onclick="backToRules()" style="margin-bottom:18px;">&larr; Back to site rules</button>
+    <h1 style="margin-top:0;">Complete your induction</h1>
+    <div id="inductionForm"></div>
+  </section>
+
+  <!-- ===================== ERROR SCREEN ===================== -->
+  <section id="s-error" class="screen errscreen">
+    <div class="big" id="errBig">Unavailable</div>
+    <p id="errMsg"></p>
+    <div id="errAction"></div>
+  </section>
+
+</main>
+<footer id="appFooter">Elm Building Group &middot; Site Induction</footer>
+
+<script>
+  /* ===== CONFIG: paste the flow HTTP POST URL after building ELM-Induction-Project-Config =====
+     Guide: Elm_HQ/Goal_Operational/Flow_Guides/ELM-Induction-Project-Config.md (rev 2026-06-26).
+     Built hardened: origin-locked CORS, project-active validation, minimal return. */
+  const CONFIG_URL = "https://default7736e13fad6b4073b3bdd18d932ca1.d1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fcf911c2b8074e178aa3c88113c0812d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pH15GUoJ84YEKNTm3aiZR2RyUfeaaHwDIiD5WK2nKtQ";
+
+  const RULES_VERSION = "V02R00 06 2026";   // locked baseline (D4); prefilled into Form 5
+
+  /* ?p= holds the Base64-encoded ProjectCode (same scheme as index.html — obfuscation, NOT
+     security; atob is reversible). A typed/garbage URL fails atob() → PROJECT='' → missing-param. */
+  const params = new URLSearchParams(location.search);
+  const _raw   = (params.get('p') || '').trim();
+  let   PROJECT = '';
+  try { PROJECT = _raw ? atob(_raw).trim() : ''; } catch (e) { PROJECT = ''; }
+
+  let CFG = null;   // per-project config from the flow
+
+  function show(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  /* POST as a "simple request" (text/plain) so the browser skips the CORS preflight that
+     Power Automate HTTP triggers cannot answer — same pattern as index.html. */
+  async function post(url, payload){
+    try{
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
+        body: JSON.stringify(payload)
+      });
+      let data = null; try { data = await res.json(); } catch(e){ data = null; }
+      return { ok: res.ok, status: res.status, data };
+    } catch(e){ return { ok:false, status:0, data:null }; }
+  }
+
+  function errorScreen(big, msg, retry){
+    document.getElementById('errBig').textContent = big;
+    document.getElementById('errMsg').textContent = msg;
+    document.getElementById('errAction').innerHTML =
+      retry ? '<button class="dark" onclick="init()">Try again</button>' : '';
+    show('s-error');
+  }
+
+  /* ---- per-project block rendering (kv = key/value; list = bulleted from newlines) ---- */
+  function kvBlock(title, rowsHtml){
+    return '<h1>'+esc(title)+'</h1><div class="rules">'+rowsHtml+
+      '<label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> '+
+      'I have read and understood this section.</label></div>';
+  }
+  function fmtMobile(m){
+    var d = (m||'').replace(/\D/g,'');               // digits only
+    if(d.length === 10 && d.charAt(0) === '0')        // 04xx xxx xxx grouping
+      return d.slice(0,4)+' '+d.slice(4,7)+' '+d.slice(7);
+    return (m||'').trim();                             // landline/other → as-is
+  }
+  function contactLine(label, name, mobile){
+    if(!name) return '';
+    var v = esc(name) + (mobile ? ' &ndash; ' + esc(fmtMobile(mobile)) : '');
+    return '<div class="kv"><strong>'+esc(label)+':</strong> '+v+'</div>';
+  }
+  function linesToList(text){
+    var lines = (text||'').split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+    if(lines.length === 0) return '';
+    if(lines.length === 1) return '<div class="kv">'+esc(lines[0])+'</div>';
+    return '<ul>'+lines.map(function(l){ return '<li>'+esc(l)+'</li>'; }).join('')+'</ul>';
+  }
+
+  function renderPerProject(cfg){
+    var html = '';
+
+    // Your Site Team
+    var team = contactLine('Site Manager', cfg.siteManager, cfg.siteManagerMobile)
+             + contactLine('Project Manager', cfg.projectManager, cfg.projectManagerMobile);
+    if(team) html += kvBlock('Your Site Team', team);
+
+    // Working Hours
+    if(cfg.workingHours) html += kvBlock('Working Hours', linesToList(cfg.workingHours));
+
+    // Site-Specific Rules
+    if(cfg.siteSpecificRules) html += kvBlock('Site-Specific Rules', linesToList(cfg.siteSpecificRules));
+
+    // Site Plan / Evac — repo image evac-<ProjectCode>.png (same as the visitor page)
+    html +=
+      '<h1>Site Plan</h1>'+
+      '<div class="evac">'+
+        '<div class="cap">Site Plan — including Evacuation</div>'+
+        '<img src="evac-'+esc(PROJECT)+'.png" alt="Site plan including muster point and evacuation route" '+
+          'onerror="this.parentNode.querySelector(\'.cap\').textContent=\'Site plan unavailable — ask the Site Manager to show you the assembly point.\';this.style.display=\'none\';">'+
+        '<label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> '+
+        'I have located the assembly point and understood the site plan.</label>'+
+      '</div>';
+
+    document.getElementById('perProject').innerHTML = html;
+    updateGate();   // recompute (new checkboxes added, still unticked → stays disabled)
+  }
+
+  /* Read-gate: enable Continue only when every section checkbox (generic + per-project) is ticked. */
+  function updateGate(){
+    var boxes = document.querySelectorAll('#s-rules .sack');
+    var all = boxes.length > 0 && Array.prototype.every.call(boxes, function(b){ return b.checked; });
+    var btn = document.getElementById('ackBtn');
+    if(btn) btn.disabled = !all;
+    var hint = document.getElementById('gateHint');
+    if(hint) hint.style.display = all ? 'none' : 'block';
+  }
+
+  var formLoaded = false;
+  function loadForm(){
+    if(document.getElementById('ackBtn').disabled) return;
+    show('s-form');
+    window.scrollTo(0, 0);
+    if(formLoaded) return; formLoaded = true;   // load the embed once
+    var entryRef = (CFG && CFG.cognitoEntryRef) ? CFG.cognitoEntryRef : '';
+    var s = document.createElement('script');
+    s.src = 'https://www.cognitoforms.com/f/seamless.js';
+    s.setAttribute('data-key', 'eRaSKgtk10WjYk0CGvkT6Q');
+    s.setAttribute('data-form', '9');
+    s.onload = function(){
+      try { Cognito.prefill({ "Project": entryRef, "RulesVersion": RULES_VERSION }); } catch(e){}
+    };
+    document.getElementById('inductionForm').appendChild(s);
+  }
+  function backToRules(){
+    show('s-rules');
+    window.scrollTo(0, 0);
+  }
+
+  /* ---- lifecycle ---- */
+  async function init(){
+    if(!PROJECT){
+      errorScreen('Missing site code',
+        'Please scan the site induction QR code. Do not type this URL directly.', false);
+      return;
+    }
+    show('s-loading');
+    var r = await post(CONFIG_URL, { projectCode: PROJECT });
+    if(r.status === 0){
+      errorScreen('Connection problem',
+        'Something went wrong loading the induction. Please try again or see your site manager.', true);
+      return;
+    }
+    if(r.status === 404){
+      errorScreen('Site not active',
+        'This site is not currently active. Please contact your site manager.', false);
+      return;
+    }
+    if(!r.ok || !r.data){
+      errorScreen('Connection problem',
+        'Something went wrong loading the induction. Please try again or see your site manager.', true);
+      return;
+    }
+    CFG = r.data;
+    document.getElementById('siteLabel').textContent = CFG.projectLabel || PROJECT;
+    renderPerProject(CFG);
+    show('s-rules');
+    window.scrollTo(0, 0);
+  }
+
+  init();
+</script>
+</body>
+</html>
