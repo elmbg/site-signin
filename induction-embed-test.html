@@ -1,180 +1,180 @@
 <!DOCTYPE html>
 <!--
   SITE INDUCTION PAGE — CONTENT PREVIEW  2026-06-26
-  Style: matches the visitor-rules presentation — black section heading + one
-  white (grey-bordered) box per section, key terms in bold, no icons, no gold,
-  no per-rule sub-boxes. Faithful in substance to Annexure D §1 (controlled
-  source of record). HARDCODED to E5100; [PER PROJECT] blocks come from the
-  ELM-Induction-Project-Config flow (Projects Register) at go-live.
-  ⚑ Sam: confirm fidelity + set RULES_VERSION; Hard Hats omitted from PPE per note.
+  Styled to MATCH index.html (the visitor/worker sign-in page) exactly: same
+  palette/fonts, black header + Elm logo, white PROJECT band, h1 section
+  headings, white .rules boxes, .evac image box, dark continue button.
+  Flow: read rules + project info -> "I have read the site rules" button ->
+  loads the Cognito Form 5 seamless embed (prefilled). Faithful in substance to
+  Annexure D §1 (controlled source). HARDCODED to E5100; per-project blocks come
+  from ELM-Induction-Project-Config (Projects Register) at go-live.
+  ⚑ Sam: confirm fidelity; Hard Hats omitted from PPE per note.
   Embed: seamless.js + Cognito.prefill (verified). data-key/data-form = Form 5.
 -->
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Site Induction — E5100 Azure Narrabundah ILU's</title>
-  <style>
-    :root { --ink:#1a1a1a; --gold:#C89600; --line:#cfcfcf; --muted:#555; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-           color:var(--ink); line-height:1.45; background:#fff; }
-    .wrap { max-width:680px; margin:0 auto; padding:16px; }
-    .band { background:#111; color:#fff; padding:18px 16px; text-align:center; }
-    .band h1 { margin:0; font-size:18px; letter-spacing:.5px; }
-    .band .proj { color:var(--gold); font-size:15px; margin-top:4px; }
-    .intro { font-size:14px; color:var(--muted); margin:14px 0; }
-    h2 { font-size:16px; color:#000; font-weight:700; border-bottom:1px solid #ddd;
-         padding-bottom:6px; margin:26px 0 8px; }
-    .ver { font-size:12px; color:var(--muted); font-style:italic; margin:-2px 0 8px; }
-    .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px;
-           color:var(--muted); border:1px solid var(--line); border-radius:4px; padding:1px 5px;
-           vertical-align:middle; margin-left:6px; }
-    .rbox { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
-    .rbox ul { margin:0; padding-left:18px; }
-    .rbox li { margin:6px 0; font-size:14px; }
-    .rbox p { margin:6px 0; font-size:14px; }
-    .rbox.team div { margin:6px 0; } .rbox.team .name { font-weight:700; }
-    .rbox.hours div { font-weight:600; margin:4px 0; }
-    strong { font-weight:700; color:#000; }
-    img.siteplan { width:100%; height:auto; border:1px solid var(--line); border-radius:8px;
-                   display:block; margin:0; }
-    .divider { text-align:center; color:#666; font-size:15px; font-weight:600; margin:28px 0 8px;
-               border-top:1px solid #ddd; padding-top:18px; }
-    footer { color:#888; font-size:12px; text-align:center; padding:24px 0; }
-    #inductionForm input, #inductionForm select, #inductionForm textarea,
-    .cognito input, .cognito select, .cognito textarea { font-size:16px !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Site Induction — E5100 Azure Narrabundah ILU's</title>
+<style>
+  :root{
+    --ink:#1b1b1b; --black:#111; --white:#fff; --grey:#6b6b6b; --line:#dcdcdc; --bg:#f3f3f3;
+    --gold-1:#C89600; --gold-2:#b08400; --gold-bd:#8c6c1e; --warn:#c8102e;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{ font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
+        background:var(--bg); color:var(--ink); display:flex; flex-direction:column; min-height:100vh; }
+  header{ background:var(--black); color:#fff; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  header .brand{ font-size:18px; font-weight:700; letter-spacing:.2px; }
+  header img.logo{ height:40px; width:auto; display:block; }
+  .projband{ background:#fff; border-bottom:1px solid var(--line); padding:13px 18px; text-align:center; }
+  .projband .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--grey); }
+  .projband .name{ font-size:19px; font-weight:700; margin-top:2px; color:var(--ink); line-height:1.25; }
+  main{ flex:1; padding:22px 16px; max-width:560px; width:100%; margin:0 auto; }
+  h1{ font-size:22px; margin:24px 0 14px; font-weight:700; }
+  h1:first-child{ margin-top:4px; }
+  .intro{ font-size:15px; color:var(--grey); line-height:1.5; margin-bottom:4px; }
+  button{ font-family:inherit; font-size:18px; font-weight:600; width:100%; padding:18px; border-radius:14px;
+          border:2px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; margin-bottom:14px; }
+  button.dark{ background:var(--black); color:#fff; border:1px solid var(--black); box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  .rules{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:16px; font-size:15px; line-height:1.5; }
+  .rules h2{ font-size:16px; margin:14px 0 8px; } .rules h2:first-child{ margin-top:0; }
+  .rules ul{ margin:0 0 0 18px; } .rules li{ margin-bottom:7px; }
+  .rules p{ margin-bottom:8px; }
+  .rules .kv{ margin-bottom:8px; } .rules .kv:last-child{ margin-bottom:0; }
+  .rules .kv b{ font-weight:700; }
+  .evac{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; text-align:center; }
+  .evac .cap{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); margin-bottom:10px; }
+  .evac img{ max-width:100%; height:auto; border-radius:8px; border:1px solid var(--line); }
+  strong{ font-weight:700; }
+  footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; line-height:1.5; }
+  #formWrap{ display:none; }
+</style>
 </head>
 <body>
+<header>
+  <div class="brand">Site Induction</div>
+  <img class="logo" src="elm-logo.png" alt="Elm Building Group" onerror="this.style.display='none'">
+</header>
+<div class="projband">
+  <div class="lbl">Project</div>
+  <div class="name">E5100 Azure Narrabundah ILU's</div>
+</div>
 
-  <div class="band">
-    <h1>SITE INDUCTION</h1>
-    <div class="proj">E5100 Azure Narrabundah ILU's</div>
-  </div>
+<main>
 
-  <div class="wrap">
+  <p class="intro">Read the site safety rules and project information below, then tap
+    <strong>I have read the site rules</strong> to complete your induction. You must be inducted before entering site.</p>
 
-    <p class="intro">Read the rules and project information below, then complete the induction at the
-      bottom of this page. You must be inducted before entering site.</p>
-
-    <h2>Site Safety Rules</h2>
-    <div class="ver">Annexure D Site Safety Rules · Version: &lt;&lt;CONFIRM-RULES-VERSION&gt;&gt;</div>
-    <div class="rbox">
-      <p>These general rules apply to every person who enters this work site.</p>
-    </div>
-
+  <h1>Site Safety Rules</h1>
+  <div class="rules">
     <h2>Mandatory PPE</h2>
-    <div class="rbox">
-      <ul>
-        <li><strong>Hi-Vis Clothing</strong> &ndash; worn at all times on site.</li>
-        <li><strong>Safety Boots</strong> &ndash; approved steel-cap footwear for the task.</li>
-        <li><strong>Task-Specific PPE</strong> &ndash; eye, hearing and other PPE as required by your SWMS or site signage.</li>
-        <li><strong>Sun Safety</strong> &ndash; no singlets; apply 30+ sunscreen every 2 hours.</li>
-      </ul>
-    </div>
+    <ul>
+      <li><strong>Hi-Vis Clothing</strong> &ndash; worn at all times on site.</li>
+      <li><strong>Safety Boots</strong> &ndash; approved steel-cap footwear for the task.</li>
+      <li><strong>Task-Specific PPE</strong> &ndash; eye, hearing and other PPE as required by your SWMS or site signage.</li>
+      <li><strong>Sun Safety</strong> &ndash; no singlets; apply 30+ sunscreen every 2 hours.</li>
+    </ul>
 
     <h2>Conduct</h2>
-    <div class="rbox">
-      <ul>
-        <li><strong>Drugs &amp; Alcohol</strong> &ndash; none on site; anyone affected will be removed.</li>
-        <li><strong>Smoking</strong> &ndash; in designated areas only; not in offices, sheds or amenities.</li>
-        <li><strong>Behaviour</strong> &ndash; no conduct that risks safety or harasses others.</li>
-        <li><strong>Fatigue</strong> &ndash; keep to normal hours and breaks; raise any concerns with site management.</li>
-        <li><strong>Prohibited</strong> &ndash; no animals, personal headphones/radios, or under-18s (except approved apprentices).</li>
-      </ul>
-    </div>
+    <ul>
+      <li><strong>Drugs &amp; Alcohol</strong> &ndash; none on site; anyone affected will be removed.</li>
+      <li><strong>Smoking</strong> &ndash; in designated areas only; not in offices, sheds or amenities.</li>
+      <li><strong>Behaviour</strong> &ndash; no conduct that risks safety or harasses others.</li>
+      <li><strong>Fatigue</strong> &ndash; keep to normal hours and breaks; raise any concerns.</li>
+      <li><strong>Prohibited</strong> &ndash; no animals, personal headphones/radios, or under-18s (except approved apprentices).</li>
+    </ul>
 
     <h2>Hazards, Injuries &amp; Emergency</h2>
-    <div class="rbox">
-      <ul>
-        <li><strong>Report Hazards</strong> &ndash; report unsafe conditions to your supervisor or Site Manager immediately.</li>
-        <li><strong>Injuries</strong> &ndash; report to First Aid and log in the injury register.</li>
-        <li><strong>Emergency</strong> &ndash; know the alarm and assembly point (see the site plan below).</li>
-        <li><strong>Safety Signs</strong> &ndash; obey all signs; never remove or damage them.</li>
-      </ul>
-    </div>
+    <ul>
+      <li><strong>Report Hazards</strong> &ndash; report unsafe conditions to your supervisor or Site Manager immediately.</li>
+      <li><strong>Injuries</strong> &ndash; report to First Aid and log in the injury register.</li>
+      <li><strong>Emergency</strong> &ndash; know the alarm and assembly point (see the site plan below).</li>
+      <li><strong>Safety Signs</strong> &ndash; obey all signs; never remove or damage them.</li>
+    </ul>
 
     <h2>On-Site Operations</h2>
-    <div class="rbox">
-      <ul>
-        <li><strong>Sign On / Off</strong> &ndash; scan the QR poster every time you enter and leave site.</li>
-        <li><strong>SWMS</strong> &ndash; sign into your SWMS before any high-risk work.</li>
-        <li><strong>Electrical</strong> &ndash; RCDs tested daily; leads off the ground; test &amp; tag current; max 30 m lead run.</li>
-        <li><strong>Permits</strong> &ndash; high-risk tasks (electrical isolation, confined space, hot works, excavation, etc.) need a permit &mdash; your supervisor arranges it.</li>
-        <li><strong>Movement &amp; Access</strong> &ndash; use designated walkways; beware mobile plant; do not enter barricaded areas.</li>
-        <li><strong>Parking</strong> &ndash; only by arrangement with Site Management; park per ACT road rules.</li>
-        <li><strong>Heights &amp; Falling Objects</strong> &ndash; protect work at height; secure tools and materials; toe boards on scaffold.</li>
-        <li><strong>Chemicals</strong> &ndash; an SDS for every chemical; work to the SWMS and SDS.</li>
-        <li><strong>Housekeeping</strong> &ndash; clean up as you go; store in designated areas; keep walkways clear.</li>
-        <li><strong>Visitors</strong> &ndash; report to the site office, sign in, and stay escorted by an inducted person.</li>
-      </ul>
-    </div>
+    <ul>
+      <li><strong>Sign On / Off</strong> &ndash; scan the QR poster every time you enter and leave site.</li>
+      <li><strong>SWMS</strong> &ndash; sign into your SWMS before any high-risk work.</li>
+      <li><strong>Electrical</strong> &ndash; RCDs tested daily; leads off the ground; test &amp; tag current; max 30 m lead run.</li>
+      <li><strong>Permits</strong> &ndash; high-risk tasks (electrical isolation, confined space, hot works, excavation, etc.) need a permit &mdash; your supervisor arranges it.</li>
+      <li><strong>Movement &amp; Access</strong> &ndash; use designated walkways; beware mobile plant; do not enter barricaded areas.</li>
+      <li><strong>Parking</strong> &ndash; only by arrangement with Site Management; park per ACT road rules.</li>
+      <li><strong>Heights &amp; Falling Objects</strong> &ndash; protect work at height; secure tools and materials; toe boards on scaffold.</li>
+      <li><strong>Chemicals</strong> &ndash; an SDS for every chemical; work to the SWMS and SDS.</li>
+      <li><strong>Housekeeping</strong> &ndash; clean up as you go; store in designated areas; keep walkways clear.</li>
+      <li><strong>Visitors</strong> &ndash; report to the site office, sign in, and stay escorted by an inducted person.</li>
+    </ul>
 
     <h2>Safety Breaches</h2>
-    <div class="rbox">
-      <ul>
-        <li><strong>Immediate removal</strong> &ndash; tampering with safety equipment, fighting, drugs or alcohol, theft, harassment or vandalism may result in immediate removal and possible prosecution.</li>
-        <li><strong>Warning system</strong> &ndash; minor breaches: verbal warning &rarr; written warning &rarr; removal from site.</li>
-      </ul>
-    </div>
-
-    <!-- ===================== PER-PROJECT BLOCKS ===================== -->
-    <h2>Your Site Team <span class="tag">PER PROJECT</span></h2>
-    <div class="rbox team">
-      <div><span class="name">Site Manager:</span> Adam Whiting &ndash; 0499 228 099</div>
-      <div><span class="name">Project Manager:</span> Sam Spencer &ndash; 0487 383 943</div>
-    </div>
-
-    <h2>Working Hours <span class="tag">PER PROJECT</span></h2>
-    <div class="rbox hours">
-      <div>Monday to Friday: 7:00am &ndash; 5:00pm</div>
-      <div>Saturday: 7:00am &ndash; 1:00pm</div>
-      <div>No work on Sundays or public holidays</div>
-    </div>
-
-    <h2>Site-Specific Rules <span class="tag">PER PROJECT</span></h2>
-    <div class="rbox">
-      <ul>
-        <li>All contractor parking to be behind Coral's Cottage &ndash; no parking in any other areas.</li>
-        <li>No construction vehicles are to be driven around the residential roadways.</li>
-      </ul>
-    </div>
-
-    <h2>Site Plan — including Evacuation <span class="tag">PER PROJECT</span></h2>
-    <div class="rbox" style="padding:6px;">
-      <img class="siteplan" src="evac-E5100.png"
-           alt="E5100 site plan including parking, access, muster point and evacuation route">
-    </div>
-
-    <!-- ===================== INDUCTION FORM ===================== -->
-    <div class="divider">↓ Complete your induction below ↓</div>
-
-    <div id="inductionForm">
-      <script src="https://www.cognitoforms.com/f/seamless.js"
-              data-key="eRaSKgtk10WjYk0CGvkT6Q"
-              data-form="9"></script>
-    </div>
-
-    <script>
-      Cognito.prefill({
-        "Project": "4-28"
-        /* , "RulesVersion": "<<CONFIRM-RULES-VERSION>>" // enable once Form 5 has the field */
-      });
-    </script>
-
-    <script>
-      (function () {
-        var vp = document.getElementById('vp');
-        var Z = 'width=device-width, initial-scale=1, viewport-fit=cover';
-        var L = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
-        document.addEventListener('focusin',  function () { vp.setAttribute('content', L); });
-        document.addEventListener('focusout', function () { vp.setAttribute('content', Z); });
-      })();
-    </script>
-
-    <footer>Elm Building Group · induction content preview · E5100 · 2026-06-26</footer>
-
+    <ul>
+      <li><strong>Immediate removal</strong> &ndash; tampering with safety equipment, fighting, drugs or alcohol, theft, harassment or vandalism may result in immediate removal and possible prosecution.</li>
+      <li><strong>Warning system</strong> &ndash; minor breaches: verbal warning &rarr; written warning &rarr; removal from site.</li>
+    </ul>
   </div>
+
+  <!-- ===================== PER-PROJECT BLOCKS (E5100 preview; from config flow at go-live) ===================== -->
+  <h1>Your Site Team</h1>
+  <div class="rules">
+    <div class="kv"><b>Site Manager:</b> Adam Whiting &ndash; 0499 228 099</div>
+    <div class="kv"><b>Project Manager:</b> Sam Spencer &ndash; 0487 383 943</div>
+  </div>
+
+  <h1>Working Hours</h1>
+  <div class="rules">
+    <div class="kv">Monday to Friday: 7:00am &ndash; 5:00pm</div>
+    <div class="kv">Saturday: 7:00am &ndash; 1:00pm</div>
+    <div class="kv">No work on Sundays or public holidays</div>
+  </div>
+
+  <h1>Site-Specific Rules</h1>
+  <div class="rules">
+    <ul>
+      <li>All contractor parking to be behind Coral's Cottage &ndash; no parking in any other areas.</li>
+      <li>No construction vehicles are to be driven around the residential roadways.</li>
+    </ul>
+  </div>
+
+  <h1>Site Plan</h1>
+  <div class="evac">
+    <div class="cap">Site Plan — including Evacuation</div>
+    <img src="evac-E5100.png" alt="E5100 site plan including parking, access, muster point and evacuation route"
+         onerror="this.parentNode.querySelector('.cap').textContent='Site plan unavailable — ask the Site Manager to show you the assembly point.';this.style.display='none';">
+  </div>
+
+  <!-- Acknowledgment gate — reveals + loads the induction form (formal declaration is inside Form 5) -->
+  <button class="dark" id="ackBtn" onclick="loadForm()">I have read the site rules — continue</button>
+
+  <!-- ===================== INDUCTION FORM (Cognito Form 5) ===================== -->
+  <div id="formWrap">
+    <h1>Complete your induction</h1>
+    <div id="inductionForm"></div>
+  </div>
+
+</main>
+<footer>Elm Building Group · Site Induction · E5100</footer>
+
+<script>
+  /* On acknowledgment, inject the Cognito seamless embed + prefill the project.
+     The binding declaration remains a tick INSIDE Form 5 (attestation rule). */
+  var formLoaded = false;
+  function loadForm(){
+    if(formLoaded) return; formLoaded = true;
+    document.getElementById('ackBtn').style.display = 'none';
+    var wrap = document.getElementById('formWrap');
+    wrap.style.display = 'block';
+    var s = document.createElement('script');
+    s.src = 'https://www.cognitoforms.com/f/seamless.js';
+    s.setAttribute('data-key', 'eRaSKgtk10WjYk0CGvkT6Q');
+    s.setAttribute('data-form', '9');
+    s.onload = function(){
+      try { Cognito.prefill({ "Project": "4-28" }); } catch(e){ /* prefill best-effort */ }
+    };
+    document.getElementById('inductionForm').appendChild(s);
+    wrap.scrollIntoView({ behavior:'smooth' });
+  }
+</script>
 </body>
 </html>
