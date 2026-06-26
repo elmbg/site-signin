@@ -35,7 +35,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Site Induction (TEST) — E5100</title>
   <style>
     :root { --ink:#1a1a1a; --gold:#C89600; --line:#e3e3e3; }
@@ -124,6 +124,20 @@
          Single form on the page -> use Cognito.prefill() directly below the embed. -->
     <script>
       Cognito.prefill({ "Project": "4-28" });
+    </script>
+
+    <!-- iOS Safari focus-zoom guard. Locks max scale ONLY while a field is focused
+         (blocks the auto-zoom-on-focus), restores pinch-zoom on blur (keeps the
+         site plan zoomable). Uses document-level focusin/out so it works even if
+         Cognito renders the form inside a Shadow DOM. -->
+    <script>
+      (function () {
+        var vp = document.getElementById('vp');
+        var ZOOMABLE = 'width=device-width, initial-scale=1, viewport-fit=cover';
+        var LOCKED   = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
+        document.addEventListener('focusin',  function () { vp.setAttribute('content', LOCKED); });
+        document.addEventListener('focusout', function () { vp.setAttribute('content', ZOOMABLE); });
+      })();
     </script>
 
     <footer>
