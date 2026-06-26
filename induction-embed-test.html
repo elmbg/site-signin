@@ -1,135 +1,223 @@
 <!DOCTYPE html>
 <!--
   ============================================================================
-  iOS-SAFARI EMBED DE-RISK TEST  —  throwaway spike (2026-06-26)
+  SITE INDUCTION PAGE — CONTENT PREVIEW (graduated from the iOS de-risk test)
   ============================================================================
-  PURPOSE: prove the Cognito Forms SEAMLESS embed of Form 5 (Site Induction
-  Record) works on a real iPhone in Safari — render, prefill, file/camera
-  upload, signature, contiguous scroll, and a real submission — BEFORE
-  investing in the full Phase 1 induction page. This is the one real unknown
-  in the Field Access Layer Phase 1 plan.
+  De-risk PASSED 2026-06-26 (render + prefill + camera + submit on iOS Safari).
+  This now previews the FULL induction page content: general site rules (from
+  Annexure D Site Safety Rules), then the per-project blocks (team, hours,
+  site-specific rules, site plan) in the order of the current Cognito form,
+  then Form 5 embedded.
 
-  This file is NOT production. Hardcoded to E5100. Delete after the test.
+  HARDCODED to E5100 for preview. At go-live the per-project blocks marked
+  [PER-PROJECT] are populated by the ELM-Induction-Project-Config flow from the
+  Projects Register (which already holds WorkingHours + SiteSpecificRules + SM/PM).
 
-  ---------------------------------------------------------------------------
-  EMBED VALUES (filled 2026-06-26 from Form 5 -> Publish -> Seamless):
-        data-key="eRaSKgtk10WjYk0CGvkT6Q"   (org embed key)
-        data-form="9"                        (Cognito form #9 = Elm "Form 5" Site Induction Record)
-    Prefill: Cognito.prefill({"Project":"4-28"})  (E5100; mirrors hosted ?entry={"Project":"4-28"}).
-  ---------------------------------------------------------------------------
-  VERIFIED SYNTAX (Cognito docs, 2026-06-26):
-    - Seamless embed = <div><script src=".../f/seamless.js" data-key data-form></script></div>
-    - Prefill        = <script>Cognito.prefill({...});</script> directly below
-      (single form on the page). Field names are the INTERNAL names, case-sensitive.
-    - "Project":"4-28" mirrors the PROVEN hosted prefill ?entry={"Project":"4-28"}
-      (4-28 = E5100's Cognito Form 4 entry reference).
-    NOTE: this REPLACES the Cognito.load('forms',{id,entry}) guess in induction.html
-          — that pattern was unverified and is wrong; use seamless.js + prefill().
-  ---------------------------------------------------------------------------
-  DEPLOY: push to the elmbg/site-signin repo, then open on a REAL iPhone:
-    https://elmbg.github.io/site-signin/induction-embed-test.html
-    (must be over HTTPS on a real origin — file:// and desktop won't tell the truth
-     about iOS camera/embed behaviour.)
+  GENERAL RULES = faithful, phone-readable rendering of Annexure D §1.0 Site
+  Safety Rules + the Safety Breaches list. Annexure D remains the controlled
+  source of record. ⚑ Sam: confirm the rules text is faithful + set the version
+  stamp (RULES_VERSION below) from Annexure D's controlled revision.
+
+  Embed: seamless.js + Cognito.prefill (verified). data-key/data-form = Form 5.
   ============================================================================
 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Site Induction (TEST) — E5100</title>
+  <title>Site Induction — E5100 Azure Narrabundah ILU's</title>
   <style>
-    :root { --ink:#1a1a1a; --gold:#C89600; --line:#e3e3e3; }
-    * { box-sizing: border-box; }
-    body {
-      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-      color:var(--ink); line-height:1.5; background:#fff;
-    }
+    :root { --ink:#1a1a1a; --gold:#C89600; --line:#e3e3e3; --muted:#555; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+           color:var(--ink); line-height:1.5; background:#fff; }
     .wrap { max-width:680px; margin:0 auto; padding:16px; }
-    .band {
-      background:#111; color:#fff; padding:18px 16px; text-align:center;
-    }
+    .band { background:#111; color:#fff; padding:18px 16px; text-align:center; }
     .band h1 { margin:0; font-size:18px; letter-spacing:.5px; }
     .band .proj { color:var(--gold); font-size:15px; margin-top:4px; }
-    .testnote {
-      background:#fff8e1; border:1px solid var(--gold); border-radius:8px;
-      padding:10px 12px; font-size:13px; margin:14px 0;
-    }
-    h2 { font-size:16px; border-bottom:2px solid var(--gold); padding-bottom:6px; }
-    .rules li { margin:6px 0; }
-    img.siteplan {
-      width:100%; height:auto; border:1px solid var(--line); border-radius:8px;
-      display:block; margin:8px 0;
-    }
-    .divider {
-      text-align:center; color:#666; font-size:14px; margin:24px 0 8px;
-      border-top:1px solid var(--line); padding-top:16px;
-    }
+    .intro { font-size:14px; color:var(--muted); margin:14px 0; }
+    h2 { font-size:16px; border-bottom:2px solid var(--gold); padding-bottom:6px; margin-top:28px; }
+    h3 { font-size:14px; margin:16px 0 4px; color:#000; }
+    ul { margin:6px 0 6px 0; padding-left:20px; }
+    li { margin:5px 0; }
+    .ver { font-size:12px; color:var(--muted); font-style:italic; margin-top:2px; }
+    .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px;
+           color:var(--gold); border:1px solid var(--gold); border-radius:4px; padding:1px 5px;
+           vertical-align:middle; margin-left:6px; }
+    .team div { margin:6px 0; }
+    .team .name { font-weight:700; }
+    .hours div, .specific li { font-weight:600; }
+    img.siteplan { width:100%; height:auto; border:1px solid var(--line); border-radius:8px;
+                   display:block; margin:8px 0; }
+    .divider { text-align:center; color:#666; font-size:15px; font-weight:600; margin:28px 0 8px;
+               border-top:1px solid var(--line); padding-top:18px; }
     footer { color:#888; font-size:12px; text-align:center; padding:24px 0; }
-
-    /* iOS Safari auto-zooms into any focused input with font-size < 16px.
-       The seamless embed is inline DOM, so we can target Cognito's controls
-       and force 16px — stops the focus-zoom while keeping manual pinch-zoom. */
-    #inductionForm input,
-    #inductionForm select,
-    #inductionForm textarea,
-    .cognito input,
-    .cognito select,
-    .cognito textarea {
-      font-size: 16px !important;
-    }
+    /* Keep embedded form inputs >=16px so iOS doesn't focus-zoom (inline-DOM case). */
+    #inductionForm input, #inductionForm select, #inductionForm textarea,
+    .cognito input, .cognito select, .cognito textarea { font-size:16px !important; }
   </style>
 </head>
 <body>
 
   <div class="band">
     <h1>SITE INDUCTION</h1>
-    <div class="proj">E5100 Azure Narrabundah ILU's &nbsp;·&nbsp; TEST PAGE</div>
+    <div class="proj">E5100 Azure Narrabundah ILU's</div>
   </div>
 
   <div class="wrap">
 
-    <div class="testnote">
-      <strong>iOS Safari de-risk test.</strong> Scroll the whole page as one, then complete &amp;
-      submit the form below. Checklist: <em>iOS_Safari_Embed_Test.md</em>.
-    </div>
+    <p class="intro">Read the site safety rules and project information below, then complete and
+      submit your induction at the bottom of this page. You must be inducted before entering site.</p>
 
-    <!-- 1. Simulated site-rules content (stands in for the rules-v2 text the page will fetch) -->
-    <h2>Site Rules</h2>
-    <ul class="rules">
-      <li>All workers must hold a current White Card and be inducted before entering site.</li>
-      <li>PPE (hard hat, hi-vis, steel-cap boots) is mandatory at all times.</li>
-      <li>Sign in on arrival and sign out on departure via the QR poster.</li>
-      <li>In an emergency, proceed to the assembly point shown on the site plan below.</li>
-      <li>Report all incidents and near-misses to the Site Manager immediately.</li>
+    <!-- ===================== GENERAL SITE SAFETY RULES (Annexure D §1) ===================== -->
+    <h2>Site Safety Rules</h2>
+    <div class="ver">Elm Building Group — Annexure D Site Safety Rules · Version: &lt;&lt;CONFIRM-RULES-VERSION&gt;&gt;</div>
+    <p style="font-size:14px;">These general rules apply to every person who enters this work site.</p>
+
+    <h3>Personal Protective Equipment (PPE)</h3>
+    <ul>
+      <li>Hard hats (AS 1801) worn at all times on site, unless a documented risk assessment alters this.</li>
+      <li>High-visibility clothing worn at all times on site.</li>
+      <li>Approved safety footwear appropriate to the task.</li>
+      <li>It is each person's responsibility to use and maintain the correct PPE, tools and equipment.</li>
+      <li>Loose clothing, loose hair and jewellery must not be worn while working.</li>
     </ul>
 
-    <!-- 2. Evac / site plan image — tests image-above-form contiguous scroll.
-         evac-E5100.png lives in the site-signin repo (web-sized). -->
-    <h2>Site Plan (incl. Evacuation)</h2>
-    <img class="siteplan" src="evac-E5100.png"
-         alt="E5100 site plan including evacuation route and assembly point">
+    <h3>Sun Safety</h3>
+    <ul>
+      <li>Practise sun safety outdoors. Singlets are not permitted. Apply 30+ broad-spectrum sunscreen every 2 hours.</li>
+    </ul>
 
+    <h3>Conduct &amp; Work Practice</h3>
+    <ul>
+      <li>Work to ensure your own and others' health and safety. No behaviour likely to cause incident or injury, and none that offends, upsets or harasses the client, public or other workers.</li>
+      <li>Comply with WHS legislation, codes of practice, the Elm Building Group PMP, manufacturers' instructions, approved SWMS, and all lawful supervisor instructions.</li>
+    </ul>
+
+    <h3>Drugs, Alcohol, Smoking &amp; Prohibited Items</h3>
+    <ul>
+      <li>No drugs or alcohol on site — anyone appearing under the influence will be removed.</li>
+      <li>Observe smoke-free zones; no smoking in offices, sheds or amenities.</li>
+      <li>No animals on site at any time.</li>
+      <li>No personal headphones/radios; AM/FM radios only at the Site Manager's discretion.</li>
+      <li>No persons under 18 unless on a formal apprenticeship or approved work experience.</li>
+    </ul>
+
+    <h3>Hazards, Injuries &amp; Reporting</h3>
+    <ul>
+      <li>If an unsafe condition needs urgent attention, correct it if safe to do so; otherwise make it as safe as possible and report it immediately.</li>
+      <li>Report all unsafe conditions or practices to your supervisor or the Elm PM/Site Manager. Use the Site Daily Notice Board to communicate hazards.</li>
+      <li>Report all injuries to the First Aid Facility and log them in the project Register of Injuries (failure to notify may affect your workers' compensation cover).</li>
+    </ul>
+
+    <h3>Emergency &amp; Evacuation</h3>
+    <ul>
+      <li>Know the site emergency procedures. Familiarise yourself with the assembly area and evacuation system — see the Site Plan below. Each person must know the evacuation signal and assembly point.</li>
+    </ul>
+
+    <h3>Electrical</h3>
+    <ul>
+      <li>Electrical isolation and energisation permits are in use on this site.</li>
+      <li>RCDs MUST be used — push-button tested daily. Keep leads on stands/hooks — no leads on the ground. Maximum 30 m from the temporary distribution board to the tool. Testing and tagging must be current.</li>
+    </ul>
+
+    <h3>Fatigue</h3>
+    <ul>
+      <li>Maintain normal hours and breaks to avoid fatigue. Inform your supervisor or the Elm PM/Site Manager of any fatigue concerns.</li>
+    </ul>
+
+    <h3>Site Access, Parking &amp; Movement</h3>
+    <ul>
+      <li>Vehicles on site only by prior arrangement with Site Management; park per ACT road rules. Elm accepts no responsibility for subcontractor vehicles.</li>
+      <li>Use designated, clearly defined access; emergency access is per the Emergency Evacuation Plan.</li>
+      <li>Use designated walkways. Do not leave site without informing your supervisor (you may need to be accounted for in an emergency). Beware mobile plant, cranes and vehicles; obey dogman/rigger/operator directions; do not enter barrier-controlled areas unless authorised.</li>
+    </ul>
+
+    <h3>Housekeeping &amp; Signs</h3>
+    <ul>
+      <li>Keep the site clean and free of waste; store materials safely in designated locations; keep all exits, walkways and stairwells clear.</li>
+      <li>Observe all safety signs. Do not remove, shift or destroy any warning sign without Elm authorisation; report accidental removal immediately.</li>
+    </ul>
+
+    <h3>Working at Heights &amp; Falling Objects</h3>
+    <ul>
+      <li>Wear a hard hat in hard-hat areas; stay clear of no-go areas and slung/lifted loads; secure loose materials; do not stack near unmeshed guardrails or edges; use tool lanyards at height; ensure scaffold toe boards are in place; isolate areas below work areas.</li>
+    </ul>
+
+    <h3>Hazardous Substances &amp; Chemicals</h3>
+    <ul>
+      <li>Always refer to the SDS and work in accordance with the approved SWMS and applicable SDS.</li>
+      <li>All chemicals must have an SDS; containers clearly marked with contents and safe-handling procedures; store per manufacturer/SDS; liaise with Site Management on storage.</li>
+    </ul>
+
+    <h3>Specific Activities</h3>
+    <ul>
+      <li>Core cutting / excavating: obtain Elm permission before starting and comply with any conditions.</li>
+      <li>Compressed air: do not skylark or use it to blow dust from hands, hair or clothing.</li>
+      <li>Ladders: platform ladders only — a ladder risk assessment is required if a platform ladder is not practicable.</li>
+    </ul>
+
+    <h3>Visitors &amp; Public Protection</h3>
+    <ul>
+      <li>Visitors report to the site office, sign the visitors register, and are accompanied at all times by an inducted person.</li>
+      <li>The public is protected by perimeter fencing/hoarding, barricades/para-webbing and signage as the PM/Site Manager deems necessary.</li>
+      <li>Report any security concerns to Site Management; gates are locked after hours (Elm management holds the only keys).</li>
+    </ul>
+
+    <h3>Safety Breaches — immediate removal</h3>
+    <p style="font-size:14px;">Any person found in breach of the following may be removed from site without warning:</p>
+    <ul>
+      <li>Removing handrails, guardrails, barricades or fences without authority; fighting or violence; bullying or pranks; refusing to comply with safety instructions; interfering with, damaging or vandalising safety equipment or amenities; attending under the influence of drugs or alcohol; racial vilification; sexual harassment; urinating or defecating outside the toilets provided; theft.</li>
+    </ul>
+    <p style="font-size:14px;">Minor non-conformance follows a warning system: 1) Verbal warning → 2) Written warning (Safety Improvement Notice) → 3) Removal from site. Any serious breach results in immediate removal and may result in prosecution.</p>
+
+    <!-- ===================== PER-PROJECT BLOCKS ===================== -->
+    <!-- [PER-PROJECT] At go-live these come from ELM-Induction-Project-Config (Projects Register).
+         Hardcoded to E5100 for this preview. -->
+
+    <h2>Your Site Team <span class="tag">PER PROJECT</span></h2>
+    <div class="team">
+      <div><span class="name">Site Manager:</span> Adam Whiting — 0499 228 099</div>
+      <div><span class="name">Project Manager:</span> Sam Spencer — 0487 383 943</div>
+    </div>
+
+    <h2>Working Hours <span class="tag">PER PROJECT</span></h2>
+    <div class="hours">
+      <div>Monday to Friday: 7:00am – 5:00pm</div>
+      <div>Saturday: 7:00am – 1:00pm</div>
+      <div>No work on Sundays or public holidays</div>
+    </div>
+
+    <h2>Site-Specific Rules <span class="tag">PER PROJECT</span></h2>
+    <ul class="specific">
+      <li>All contractor parking to be behind Coral's Cottage — no parking in any other areas.</li>
+      <li>No construction vehicles are to be driven around the residential roadways.</li>
+    </ul>
+
+    <h2>Site Plan — including Evacuation <span class="tag">PER PROJECT</span></h2>
+    <img class="siteplan" src="evac-E5100.png"
+         alt="E5100 site plan including parking, access, muster point and evacuation route">
+
+    <!-- ===================== INDUCTION FORM (Cognito Form 5) ===================== -->
     <div class="divider">↓ Complete your induction below ↓</div>
 
-    <!-- 3. Cognito Form 5 — SEAMLESS embed -->
-    <!-- Replace __DATA_KEY__ and __DATA_FORM__ with the values from
-         Form 5 → Publish → Seamless (see header comment). -->
     <div id="inductionForm">
       <script src="https://www.cognitoforms.com/f/seamless.js"
               data-key="eRaSKgtk10WjYk0CGvkT6Q"
               data-form="9"></script>
     </div>
 
-    <!-- Prefill the Project field for E5100 (mirrors the proven hosted prefill {"Project":"4-28"}).
-         Single form on the page -> use Cognito.prefill() directly below the embed. -->
+    <!-- Prefill Project for E5100 (proven). RulesVersion prefill is commented until the
+         Cognito text field exists + the Cognito->SP flow pulls it (go-live task). -->
     <script>
-      Cognito.prefill({ "Project": "4-28" });
+      Cognito.prefill({
+        "Project": "4-28"
+        /* , "RulesVersion": "<<CONFIRM-RULES-VERSION>>"  // enable once Form 5 has the field */
+      });
     </script>
 
-    <!-- iOS Safari focus-zoom guard. Locks max scale ONLY while a field is focused
-         (blocks the auto-zoom-on-focus), restores pinch-zoom on blur (keeps the
-         site plan zoomable). Uses document-level focusin/out so it works even if
-         Cognito renders the form inside a Shadow DOM. -->
+    <!-- iOS focus-zoom guard: lock scale only while a field is focused; restore on blur
+         (shadow-DOM safe via document-level focusin/out). -->
     <script>
       (function () {
         var vp = document.getElementById('vp');
@@ -140,9 +228,7 @@
       })();
     </script>
 
-    <footer>
-      Elm Building Group · induction embed de-risk test · 2026-06-26 · delete after testing
-    </footer>
+    <footer>Elm Building Group · induction content preview · E5100 · 2026-06-26</footer>
 
   </div>
 </body>
