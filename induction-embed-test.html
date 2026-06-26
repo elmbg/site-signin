@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <!--
-  SITE INDUCTION PAGE — CONTENT PREVIEW (icon cards, tight wording)  2026-06-26
-  De-risk PASSED (render + prefill + camera + submit on iOS Safari).
-  Rules = concise icon cards (Pier style): Mandatory PPE pictograms + small
-  icons per rule. Faithful in substance to Annexure D §1 (controlled source).
-  HARDCODED to E5100; [PER PROJECT] blocks come from ELM-Induction-Project-Config
-  (Projects Register) at go-live. ⚑ Sam: confirm fidelity + set RULES_VERSION.
+  SITE INDUCTION PAGE — CONTENT PREVIEW  2026-06-26
+  Style: matches the visitor-rules presentation — black section heading + one
+  white (grey-bordered) box per section, key terms in bold, no icons, no gold,
+  no per-rule sub-boxes. Faithful in substance to Annexure D §1 (controlled
+  source of record). HARDCODED to E5100; [PER PROJECT] blocks come from the
+  ELM-Induction-Project-Config flow (Projects Register) at go-live.
+  ⚑ Sam: confirm fidelity + set RULES_VERSION; Hard Hats omitted from PPE per note.
   Embed: seamless.js + Cognito.prefill (verified). data-key/data-form = Form 5.
 -->
 <html lang="en">
@@ -14,113 +15,38 @@
   <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Site Induction — E5100 Azure Narrabundah ILU's</title>
   <style>
-    :root { --ink:#1a1a1a; --gold:#C89600; --line:#e3e3e3; --muted:#555; --blue:#0070C0; }
+    :root { --ink:#1a1a1a; --gold:#C89600; --line:#cfcfcf; --muted:#555; }
     * { box-sizing:border-box; }
     body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-           color:var(--ink); line-height:1.35; background:#fff; }
+           color:var(--ink); line-height:1.45; background:#fff; }
     .wrap { max-width:680px; margin:0 auto; padding:16px; }
     .band { background:#111; color:#fff; padding:18px 16px; text-align:center; }
     .band h1 { margin:0; font-size:18px; letter-spacing:.5px; }
     .band .proj { color:var(--gold); font-size:15px; margin-top:4px; }
     .intro { font-size:14px; color:var(--muted); margin:14px 0; }
-    h2 { font-size:16px; border-bottom:2px solid var(--gold); padding-bottom:6px; margin-top:26px; }
-    .ver { font-size:12px; color:var(--muted); font-style:italic; margin-top:2px; }
+    h2 { font-size:16px; color:#000; font-weight:700; border-bottom:1px solid #ddd;
+         padding-bottom:6px; margin:26px 0 8px; }
+    .ver { font-size:12px; color:var(--muted); font-style:italic; margin:-2px 0 8px; }
     .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px;
-           color:var(--gold); border:1px solid var(--gold); border-radius:4px; padding:1px 5px;
+           color:var(--muted); border:1px solid var(--line); border-radius:4px; padding:1px 5px;
            vertical-align:middle; margin-left:6px; }
-    .ic { stroke-linecap:round; stroke-linejoin:round; flex:none; }
-
-    /* PPE pictogram tiles */
-    .ppe { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:8px 0; }
-    @media (min-width:520px){ .ppe { grid-template-columns:repeat(5,1fr); } }
-    .ppe .tile { text-align:center; border:1px solid var(--line); border-radius:8px; padding:8px 4px; }
-    .ppe .tile .ic { width:44px; height:44px; }
-    .ppe .tile b { display:block; font-size:11.5px; margin-top:4px; }
-
-    /* Rule cards: icon + tight text */
-    .grid { display:grid; grid-template-columns:1fr; gap:7px; margin:6px 0; }
-    @media (min-width:480px){ .grid { grid-template-columns:1fr 1fr; } }
-    .card { display:flex; gap:9px; align-items:center; border:1px solid var(--line);
-            border-left:3px solid var(--gold); border-radius:6px; padding:7px 9px; }
-    .card .ic { width:24px; height:24px; color:var(--gold); }
-    .card b { display:block; font-size:13px; line-height:1.2; }
-    .card span { font-size:12px; color:#444; }
-    .card.breach { border-left-color:#c0392b; } .card.breach .ic { color:#c0392b; }
-
-    .team div { margin:6px 0; } .team .name { font-weight:700; }
-    .hours div, .specific li { font-weight:600; }
-    ul.specific { margin:6px 0; padding-left:20px; } ul.specific li { margin:5px 0; }
+    .rbox { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+    .rbox ul { margin:0; padding-left:18px; }
+    .rbox li { margin:6px 0; font-size:14px; }
+    .rbox p { margin:6px 0; font-size:14px; }
+    .rbox.team div { margin:6px 0; } .rbox.team .name { font-weight:700; }
+    .rbox.hours div { font-weight:600; margin:4px 0; }
+    strong { font-weight:700; color:#000; }
     img.siteplan { width:100%; height:auto; border:1px solid var(--line); border-radius:8px;
-                   display:block; margin:8px 0; }
+                   display:block; margin:0; }
     .divider { text-align:center; color:#666; font-size:15px; font-weight:600; margin:28px 0 8px;
-               border-top:1px solid var(--line); padding-top:18px; }
+               border-top:1px solid #ddd; padding-top:18px; }
     footer { color:#888; font-size:12px; text-align:center; padding:24px 0; }
     #inductionForm input, #inductionForm select, #inductionForm textarea,
     .cognito input, .cognito select, .cognito textarea { font-size:16px !important; }
   </style>
 </head>
 <body>
-
-  <!-- ============ ICON SPRITE ============ -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <!-- PPE pictograms (blue circle, white symbol) -->
-    <symbol id="p-hat" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="19" fill="#0070C0"/>
-      <path d="M11 26 q9 -12 18 0" fill="none" stroke="#fff" stroke-width="2.2"/>
-      <line x1="8" y1="26" x2="32" y2="26" stroke="#fff" stroke-width="2.2"/>
-      <line x1="20" y1="13" x2="20" y2="15.5" stroke="#fff" stroke-width="2.2"/>
-    </symbol>
-    <symbol id="p-vis" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="19" fill="#0070C0"/>
-      <path d="M14 13 l6 3 l6 -3 v15 h-12 z" fill="none" stroke="#fff" stroke-width="2"/>
-      <line x1="18" y1="18" x2="18" y2="28" stroke="#fff" stroke-width="1.5"/>
-      <line x1="22" y1="18" x2="22" y2="28" stroke="#fff" stroke-width="1.5"/>
-    </symbol>
-    <symbol id="p-boot" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="19" fill="#0070C0"/>
-      <path d="M16 12 v11 h10 a2 2 0 0 0 1 -4 l-7 -1 v-6 z" fill="none" stroke="#fff" stroke-width="2"/>
-    </symbol>
-    <symbol id="p-eye" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="19" fill="#0070C0"/>
-      <rect x="11" y="17" width="7" height="5" rx="2.5" fill="none" stroke="#fff" stroke-width="2"/>
-      <rect x="22" y="17" width="7" height="5" rx="2.5" fill="none" stroke="#fff" stroke-width="2"/>
-      <line x1="18" y1="19.5" x2="22" y2="19.5" stroke="#fff" stroke-width="2"/>
-    </symbol>
-    <symbol id="p-sun" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="19" fill="#0070C0"/>
-      <circle cx="20" cy="20" r="5" fill="none" stroke="#fff" stroke-width="2"/>
-      <g stroke="#fff" stroke-width="2" stroke-linecap="round">
-        <line x1="20" y1="9" x2="20" y2="11.5"/><line x1="20" y1="28.5" x2="20" y2="31"/>
-        <line x1="9" y1="20" x2="11.5" y2="20"/><line x1="28.5" y1="20" x2="31" y2="20"/>
-        <line x1="12.5" y1="12.5" x2="14" y2="14"/><line x1="26" y1="26" x2="27.5" y2="27.5"/>
-        <line x1="27.5" y1="12.5" x2="26" y2="14"/><line x1="14" y1="26" x2="12.5" y2="27.5"/>
-      </g>
-    </symbol>
-
-    <!-- Line icons (inherit gold via currentColor) -->
-    <g fill="none" stroke="currentColor" stroke-width="1.7">
-      <symbol id="i-noalc" viewBox="0 0 24 24"><path d="M9 4h6l-3 6v7M9 17h6"/><line x1="5" y1="5" x2="19" y2="19"/></symbol>
-      <symbol id="i-nosmoke" viewBox="0 0 24 24"><rect x="4" y="13" width="13" height="3" rx="1"/><line x1="5" y1="6" x2="19" y2="20"/></symbol>
-      <symbol id="i-behave" viewBox="0 0 24 24"><path d="M5 6h14v9h-9l-3 3v-3H5z"/></symbol>
-      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></symbol>
-      <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/></symbol>
-      <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></symbol>
-      <symbol id="i-aid" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M12 9v6M9 12h6"/></symbol>
-      <symbol id="i-bell" viewBox="0 0 24 24"><path d="M7 17V11a5 5 0 0 1 10 0v6l1.5 2H5.5z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
-      <symbol id="i-sign" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="8" rx="1"/><line x1="12" y1="13" x2="12" y2="20"/></symbol>
-      <symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h2v2M18 18h2M16 20h4"/></symbol>
-      <symbol id="i-doc" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="1"/><path d="M9 13l2 2 4-4"/><line x1="9" y1="8" x2="15" y2="8"/></symbol>
-      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 6 13h5l-2 8 9-11h-5z"/></symbol>
-      <symbol id="i-permit" viewBox="0 0 24 24"><rect x="6" y="5" width="12" height="15" rx="1"/><rect x="9" y="3" width="6" height="3.5" rx="1"/><path d="M9 13l2 2 4-4"/></symbol>
-      <symbol id="i-walk" viewBox="0 0 24 24"><circle cx="13" cy="5" r="2"/><path d="M13 8v6M13 10l-3 3M13 11l3 1M13 14l-2 5M13 14l3 4"/></symbol>
-      <symbol id="i-park" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 8v8M9 8h3a2 2 0 0 1 0 4H9"/></symbol>
-      <symbol id="i-fall" viewBox="0 0 24 24"><line x1="12" y1="4" x2="12" y2="15"/><path d="M8 11l4 4 4-4"/><line x1="5" y1="20" x2="19" y2="20"/></symbol>
-      <symbol id="i-flask" viewBox="0 0 24 24"><path d="M10 4v5l-4 8a1 1 0 0 0 1 2h10a1 1 0 0 0 1-2l-4-8V4"/><line x1="9" y1="4" x2="15" y2="4"/></symbol>
-      <symbol id="i-broom" viewBox="0 0 24 24"><line x1="16" y1="5" x2="10" y2="11"/><path d="M5 19l4-5 5 5-5 3z"/></symbol>
-      <symbol id="i-visitor" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3"/><path d="M6 20a6 6 0 0 1 12 0"/><line x1="12" y1="3" x2="12" y2="1.5"/></symbol>
-      <symbol id="i-steps" viewBox="0 0 24 24"><rect x="4" y="14" width="4" height="6"/><rect x="10" y="10" width="4" height="10"/><rect x="16" y="6" width="4" height="14"/></symbol>
-    </g>
-  </svg>
 
   <div class="band">
     <h1>SITE INDUCTION</h1>
@@ -129,81 +55,97 @@
 
   <div class="wrap">
 
-    <p class="intro">Read the rules and project info below, then complete the induction at the bottom.
-      You must be inducted before entering site.</p>
+    <p class="intro">Read the rules and project information below, then complete the induction at the
+      bottom of this page. You must be inducted before entering site.</p>
 
     <h2>Site Safety Rules</h2>
     <div class="ver">Annexure D Site Safety Rules · Version: &lt;&lt;CONFIRM-RULES-VERSION&gt;&gt;</div>
-
-    <!-- PPE pictograms -->
-    <div class="ppe">
-      <div class="tile"><svg class="ic"><use href="#p-hat"/></svg><b>Hard Hat</b></div>
-      <div class="tile"><svg class="ic"><use href="#p-vis"/></svg><b>Hi-Vis</b></div>
-      <div class="tile"><svg class="ic"><use href="#p-boot"/></svg><b>Safety Boots</b></div>
-      <div class="tile"><svg class="ic"><use href="#p-eye"/></svg><b>Task PPE</b></div>
-      <div class="tile"><svg class="ic"><use href="#p-sun"/></svg><b>Sun Safe</b></div>
+    <div class="rbox">
+      <p>These general rules apply to every person who enters this work site.</p>
     </div>
 
-    <h2 style="border:none;margin-top:18px;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;">Conduct</h2>
-    <div class="grid">
-      <div class="card"><svg class="ic"><use href="#i-noalc"/></svg><div><b>Drugs &amp; Alcohol</b><span>None on site.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-nosmoke"/></svg><div><b>Smoking</b><span>Designated areas only.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-behave"/></svg><div><b>Behaviour</b><span>No unsafe or abusive conduct.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-clock"/></svg><div><b>Fatigue</b><span>Keep to hours &amp; breaks.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-ban"/></svg><div><b>Prohibited</b><span>No animals, headphones, under-18s.</span></div></div>
+    <h2>Mandatory PPE</h2>
+    <div class="rbox">
+      <ul>
+        <li><strong>Hi-Vis Clothing</strong> &ndash; worn at all times on site.</li>
+        <li><strong>Safety Boots</strong> &ndash; approved steel-cap footwear for the task.</li>
+        <li><strong>Task-Specific PPE</strong> &ndash; eye, hearing and other PPE as required by your SWMS or site signage.</li>
+        <li><strong>Sun Safety</strong> &ndash; no singlets; apply 30+ sunscreen every 2 hours.</li>
+      </ul>
     </div>
 
-    <h2 style="border:none;margin-top:18px;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;">Hazards, Injuries &amp; Emergency</h2>
-    <div class="grid">
-      <div class="card"><svg class="ic"><use href="#i-warn"/></svg><div><b>Report Hazards</b><span>Tell your supervisor now.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-aid"/></svg><div><b>Injuries</b><span>Report to First Aid; log it.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-bell"/></svg><div><b>Emergency</b><span>Know the alarm &amp; assembly point.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-sign"/></svg><div><b>Safety Signs</b><span>Obey all signs.</span></div></div>
+    <h2>Conduct</h2>
+    <div class="rbox">
+      <ul>
+        <li><strong>Drugs &amp; Alcohol</strong> &ndash; none on site; anyone affected will be removed.</li>
+        <li><strong>Smoking</strong> &ndash; in designated areas only; not in offices, sheds or amenities.</li>
+        <li><strong>Behaviour</strong> &ndash; no conduct that risks safety or harasses others.</li>
+        <li><strong>Fatigue</strong> &ndash; keep to normal hours and breaks; raise any concerns with site management.</li>
+        <li><strong>Prohibited</strong> &ndash; no animals, personal headphones/radios, or under-18s (except approved apprentices).</li>
+      </ul>
     </div>
 
-    <h2 style="border:none;margin-top:18px;font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;">On-Site Operations</h2>
-    <div class="grid">
-      <div class="card"><svg class="ic"><use href="#i-qr"/></svg><div><b>Sign On / Off</b><span>Scan the QR poster every time.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-doc"/></svg><div><b>SWMS</b><span>Sign in before high-risk work.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-bolt"/></svg><div><b>Electrical</b><span>RCDs daily; leads off ground; tag current.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-permit"/></svg><div><b>Permits</b><span>High-risk tasks need a permit.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-walk"/></svg><div><b>Movement</b><span>Walkways only; mind mobile plant.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-park"/></svg><div><b>Parking</b><span>By arrangement; ACT road rules.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-fall"/></svg><div><b>Heights</b><span>Protect edges; secure tools.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-flask"/></svg><div><b>Chemicals</b><span>An SDS for every chemical.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-broom"/></svg><div><b>Housekeeping</b><span>Clean as you go; clear walkways.</span></div></div>
-      <div class="card"><svg class="ic"><use href="#i-visitor"/></svg><div><b>Visitors</b><span>Sign in; stay escorted.</span></div></div>
+    <h2>Hazards, Injuries &amp; Emergency</h2>
+    <div class="rbox">
+      <ul>
+        <li><strong>Report Hazards</strong> &ndash; report unsafe conditions to your supervisor or Site Manager immediately.</li>
+        <li><strong>Injuries</strong> &ndash; report to First Aid and log in the injury register.</li>
+        <li><strong>Emergency</strong> &ndash; know the alarm and assembly point (see the site plan below).</li>
+        <li><strong>Safety Signs</strong> &ndash; obey all signs; never remove or damage them.</li>
+      </ul>
     </div>
 
-    <h2 style="border:none;margin-top:18px;font-size:13px;color:#c0392b;text-transform:uppercase;letter-spacing:.6px;">Safety Breaches</h2>
-    <div class="grid">
-      <div class="card breach"><svg class="ic"><use href="#i-ban"/></svg><div><b>Immediate removal</b><span>Tampering, fighting, drugs, theft, harassment.</span></div></div>
-      <div class="card breach"><svg class="ic"><use href="#i-steps"/></svg><div><b>Warnings</b><span>Verbal → written → removal.</span></div></div>
+    <h2>On-Site Operations</h2>
+    <div class="rbox">
+      <ul>
+        <li><strong>Sign On / Off</strong> &ndash; scan the QR poster every time you enter and leave site.</li>
+        <li><strong>SWMS</strong> &ndash; sign into your SWMS before any high-risk work.</li>
+        <li><strong>Electrical</strong> &ndash; RCDs tested daily; leads off the ground; test &amp; tag current; max 30 m lead run.</li>
+        <li><strong>Permits</strong> &ndash; high-risk tasks (electrical isolation, confined space, hot works, excavation, etc.) need a permit &mdash; your supervisor arranges it.</li>
+        <li><strong>Movement &amp; Access</strong> &ndash; use designated walkways; beware mobile plant; do not enter barricaded areas.</li>
+        <li><strong>Parking</strong> &ndash; only by arrangement with Site Management; park per ACT road rules.</li>
+        <li><strong>Heights &amp; Falling Objects</strong> &ndash; protect work at height; secure tools and materials; toe boards on scaffold.</li>
+        <li><strong>Chemicals</strong> &ndash; an SDS for every chemical; work to the SWMS and SDS.</li>
+        <li><strong>Housekeeping</strong> &ndash; clean up as you go; store in designated areas; keep walkways clear.</li>
+        <li><strong>Visitors</strong> &ndash; report to the site office, sign in, and stay escorted by an inducted person.</li>
+      </ul>
+    </div>
+
+    <h2>Safety Breaches</h2>
+    <div class="rbox">
+      <ul>
+        <li><strong>Immediate removal</strong> &ndash; tampering with safety equipment, fighting, drugs or alcohol, theft, harassment or vandalism may result in immediate removal and possible prosecution.</li>
+        <li><strong>Warning system</strong> &ndash; minor breaches: verbal warning &rarr; written warning &rarr; removal from site.</li>
+      </ul>
     </div>
 
     <!-- ===================== PER-PROJECT BLOCKS ===================== -->
     <h2>Your Site Team <span class="tag">PER PROJECT</span></h2>
-    <div class="team">
-      <div><span class="name">Site Manager:</span> Adam Whiting — 0499 228 099</div>
-      <div><span class="name">Project Manager:</span> Sam Spencer — 0487 383 943</div>
+    <div class="rbox team">
+      <div><span class="name">Site Manager:</span> Adam Whiting &ndash; 0499 228 099</div>
+      <div><span class="name">Project Manager:</span> Sam Spencer &ndash; 0487 383 943</div>
     </div>
 
     <h2>Working Hours <span class="tag">PER PROJECT</span></h2>
-    <div class="hours">
-      <div>Monday to Friday: 7:00am – 5:00pm</div>
-      <div>Saturday: 7:00am – 1:00pm</div>
+    <div class="rbox hours">
+      <div>Monday to Friday: 7:00am &ndash; 5:00pm</div>
+      <div>Saturday: 7:00am &ndash; 1:00pm</div>
       <div>No work on Sundays or public holidays</div>
     </div>
 
     <h2>Site-Specific Rules <span class="tag">PER PROJECT</span></h2>
-    <ul class="specific">
-      <li>All contractor parking to be behind Coral's Cottage — no parking in any other areas.</li>
-      <li>No construction vehicles are to be driven around the residential roadways.</li>
-    </ul>
+    <div class="rbox">
+      <ul>
+        <li>All contractor parking to be behind Coral's Cottage &ndash; no parking in any other areas.</li>
+        <li>No construction vehicles are to be driven around the residential roadways.</li>
+      </ul>
+    </div>
 
     <h2>Site Plan — including Evacuation <span class="tag">PER PROJECT</span></h2>
-    <img class="siteplan" src="evac-E5100.png"
-         alt="E5100 site plan including parking, access, muster point and evacuation route">
+    <div class="rbox" style="padding:6px;">
+      <img class="siteplan" src="evac-E5100.png"
+           alt="E5100 site plan including parking, access, muster point and evacuation route">
+    </div>
 
     <!-- ===================== INDUCTION FORM ===================== -->
     <div class="divider">↓ Complete your induction below ↓</div>
