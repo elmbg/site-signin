@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- Induction submitted confirmation. Set as Cognito Form 5 -> Submission ->
+     "Go to web address" so the worker lands here after submitting (replaces the
+     long form page with a clean done screen). Generic; no per-project params. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Induction Submitted — Elm Building Group</title>
+  <style>
+    :root { --ink:#1a1a1a; --gold:#C89600; --green:#1e8e4e; }
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+           color:var(--ink); background:#111; padding:24px; }
+    .box { background:#fff; border-radius:14px; max-width:420px; width:100%; text-align:center;
+           padding:32px 24px; }
+    .check { width:72px; height:72px; margin:0 auto 16px; }
+    h1 { font-size:20px; margin:0 0 8px; }
+    p { font-size:15px; color:#444; margin:6px 0; }
+    .small { font-size:13px; color:#777; margin-top:18px; }
+    .gold { color:var(--gold); font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <svg class="check" viewBox="0 0 72 72" aria-hidden="true">
+      <circle cx="36" cy="36" r="33" fill="none" stroke="#1e8e4e" stroke-width="4"/>
+      <path d="M22 37 l10 10 l18 -22" fill="none" stroke="#1e8e4e" stroke-width="5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>Induction submitted</h1>
+    <p>Thanks — your site induction has been received.</p>
+    <p>Remember to <span class="gold">scan the sign-in QR poster</span> each time you enter and leave site.</p>
+    <p class="small">You may now close this tab. Work safe.<br>Elm Building Group</p>
+  </div>
+</body>
+</html>
