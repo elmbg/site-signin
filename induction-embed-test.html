@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <!--
   SITE INDUCTION PAGE — CONTENT PREVIEW  2026-06-26
-  Styled to MATCH index.html (the visitor/worker sign-in page) exactly: same
-  palette/fonts, black header + Elm logo, white PROJECT band, h1 section
-  headings, white .rules boxes, .evac image box, dark continue button.
-  Flow: read rules + project info -> "I have read the site rules" button ->
-  loads the Cognito Form 5 seamless embed (prefilled). Faithful in substance to
-  Annexure D §1 (controlled source). HARDCODED to E5100; per-project blocks come
-  from ELM-Induction-Project-Config (Projects Register) at go-live.
-  ⚑ Sam: confirm fidelity; Hard Hats omitted from PPE per note.
-  Embed: seamless.js + Cognito.prefill (verified). data-key/data-form = Form 5.
+  Styled to MATCH index.html exactly. Each section is its own white box with an
+  acknowledgment checkbox; the "continue" button is disabled until every section
+  is ticked (read-gate). On continue -> swaps to a full form screen (scroll top)
+  and loads the Cognito Form 5 seamless embed (prefilled).
+  HARDCODED to E5100; per-project blocks come from ELM-Induction-Project-Config
+  (Projects Register) at go-live. Faithful in substance to Annexure D §1.
+  ⚑ The page ticks are a READ-GATE only. The binding acknowledgment must be
+     worker-ticked INSIDE Form 5 (attestation rule). Matching the Form 24.2 PDF
+     checklist is a Form 5 / CDU decision — see the build brief.
 -->
 <html lang="en">
 <head>
@@ -32,22 +32,24 @@
   .projband .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--grey); }
   .projband .name{ font-size:19px; font-weight:700; margin-top:2px; color:var(--ink); line-height:1.25; }
   main{ flex:1; padding:22px 16px; max-width:560px; width:100%; margin:0 auto; }
-  h1{ font-size:22px; margin:24px 0 14px; font-weight:700; }
-  h1:first-child{ margin-top:4px; }
+  h1{ font-size:22px; margin:24px 0 12px; font-weight:700; }
+  h1:first-of-type{ margin-top:4px; }
   .intro{ font-size:15px; color:var(--grey); line-height:1.5; margin-bottom:4px; }
   button{ font-family:inherit; font-size:18px; font-weight:600; width:100%; padding:18px; border-radius:14px;
           border:2px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; margin-bottom:14px; }
   button.dark{ background:var(--black); color:#fff; border:1px solid var(--black); box-shadow:0 2px 5px rgba(0,0,0,.12); }
   button.ghost{ background:#fff; color:var(--ink); border:2px solid var(--line); }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
   .rules{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:16px; font-size:15px; line-height:1.5; }
-  .rules h2{ font-size:16px; margin:14px 0 8px; } .rules h2:first-child{ margin-top:0; }
   .rules ul{ margin:0 0 0 18px; } .rules li{ margin-bottom:7px; }
-  .rules p{ margin-bottom:8px; }
   .rules .kv{ margin-bottom:8px; } .rules .kv:last-child{ margin-bottom:0; }
-  .rules .kv b{ font-weight:700; }
   .evac{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; text-align:center; }
   .evac .cap{ font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--grey); margin-bottom:10px; }
   .evac img{ max-width:100%; height:auto; border-radius:8px; border:1px solid var(--line); }
+  .ackrow{ display:flex; align-items:center; gap:11px; margin-top:14px; padding-top:12px;
+           border-top:1px solid var(--line); font-weight:600; font-size:14px; }
+  .ackrow input{ width:24px; height:24px; flex:0 0 auto; }
+  .gatehint{ font-size:13px; color:var(--grey); text-align:center; margin:2px 0 14px; }
   strong{ font-weight:700; }
   footer{ text-align:center; padding:14px; font-size:11px; color:#9a9a9a; line-height:1.5; }
   #formScreen{ display:none; }
@@ -66,20 +68,23 @@
 <main>
 
   <div id="rulesScreen">
-  <p class="intro">Read the site safety rules and project information below, then tap
-    <strong>I have read the site rules</strong> to complete your induction. You must be inducted before entering site.</p>
+  <p class="intro">Read each section below and tick to confirm you understand it. When all sections are
+    ticked you can continue to complete your induction. You must be inducted before entering site.</p>
 
-  <h1>Site Safety Rules</h1>
+  <h1>Mandatory PPE</h1>
   <div class="rules">
-    <h2>Mandatory PPE</h2>
     <ul>
       <li><strong>Hi-Vis Clothing</strong> &ndash; worn at all times on site.</li>
       <li><strong>Safety Boots</strong> &ndash; approved steel-cap footwear for the task.</li>
+      <li><strong>Hard Hats</strong> &ndash; worn during overhead work (cranes, concrete pumps, lifting operations) and wherever signed.</li>
       <li><strong>Task-Specific PPE</strong> &ndash; eye, hearing and other PPE as required by your SWMS or site signage.</li>
       <li><strong>Sun Safety</strong> &ndash; no singlets; apply 30+ sunscreen every 2 hours.</li>
     </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
 
-    <h2>Conduct</h2>
+  <h1>Conduct</h1>
+  <div class="rules">
     <ul>
       <li><strong>Drugs &amp; Alcohol</strong> &ndash; none on site; anyone affected will be removed.</li>
       <li><strong>Smoking</strong> &ndash; in designated areas only; not in offices, sheds or amenities.</li>
@@ -87,16 +92,22 @@
       <li><strong>Fatigue</strong> &ndash; keep to normal hours and breaks; raise any concerns.</li>
       <li><strong>Prohibited</strong> &ndash; no animals, personal headphones/radios, or under-18s (except approved apprentices).</li>
     </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
 
-    <h2>Hazards, Injuries &amp; Emergency</h2>
+  <h1>Hazards, Injuries &amp; Emergency</h1>
+  <div class="rules">
     <ul>
       <li><strong>Report Hazards</strong> &ndash; report unsafe conditions to your supervisor or Site Manager immediately.</li>
       <li><strong>Injuries</strong> &ndash; report to First Aid and log in the injury register.</li>
       <li><strong>Emergency</strong> &ndash; know the alarm and assembly point (see the site plan below).</li>
       <li><strong>Safety Signs</strong> &ndash; obey all signs; never remove or damage them.</li>
     </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
 
-    <h2>On-Site Operations</h2>
+  <h1>On-Site Operations</h1>
+  <div class="rules">
     <ul>
       <li><strong>Sign On / Off</strong> &ndash; scan the QR poster every time you enter and leave site.</li>
       <li><strong>SWMS</strong> &ndash; sign into your SWMS before any high-risk work.</li>
@@ -109,19 +120,24 @@
       <li><strong>Housekeeping</strong> &ndash; clean up as you go; store in designated areas; keep walkways clear.</li>
       <li><strong>Visitors</strong> &ndash; report to the site office, sign in, and stay escorted by an inducted person.</li>
     </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
+  </div>
 
-    <h2>Safety Breaches</h2>
+  <h1>Safety Breaches</h1>
+  <div class="rules">
     <ul>
       <li><strong>Immediate removal</strong> &ndash; tampering with safety equipment, fighting, drugs or alcohol, theft, harassment or vandalism may result in immediate removal and possible prosecution.</li>
       <li><strong>Warning system</strong> &ndash; minor breaches: verbal warning &rarr; written warning &rarr; removal from site.</li>
     </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
   </div>
 
   <!-- ===================== PER-PROJECT BLOCKS (E5100 preview; from config flow at go-live) ===================== -->
   <h1>Your Site Team</h1>
   <div class="rules">
-    <div class="kv"><b>Site Manager:</b> Adam Whiting &ndash; 0499 228 099</div>
-    <div class="kv"><b>Project Manager:</b> Sam Spencer &ndash; 0487 383 943</div>
+    <div class="kv"><strong>Site Manager:</strong> Adam Whiting &ndash; 0499 228 099</div>
+    <div class="kv"><strong>Project Manager:</strong> Sam Spencer &ndash; 0487 383 943</div>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
   </div>
 
   <h1>Working Hours</h1>
@@ -129,6 +145,7 @@
     <div class="kv">Monday to Friday: 7:00am &ndash; 5:00pm</div>
     <div class="kv">Saturday: 7:00am &ndash; 1:00pm</div>
     <div class="kv">No work on Sundays or public holidays</div>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
   </div>
 
   <h1>Site-Specific Rules</h1>
@@ -137,6 +154,7 @@
       <li>All contractor parking to be behind Coral's Cottage &ndash; no parking in any other areas.</li>
       <li>No construction vehicles are to be driven around the residential roadways.</li>
     </ul>
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have read and understood this section.</label>
   </div>
 
   <h1>Site Plan</h1>
@@ -144,10 +162,11 @@
     <div class="cap">Site Plan — including Evacuation</div>
     <img src="evac-E5100.png" alt="E5100 site plan including parking, access, muster point and evacuation route"
          onerror="this.parentNode.querySelector('.cap').textContent='Site plan unavailable — ask the Site Manager to show you the assembly point.';this.style.display='none';">
+    <label class="ackrow"><input type="checkbox" class="sack" onchange="updateGate()"> I have located the assembly point and understood the site plan.</label>
   </div>
 
-  <!-- Acknowledgment gate — switches to the form screen (formal declaration is inside Form 5) -->
-  <button class="dark" id="ackBtn" onclick="loadForm()">I have read the site rules — continue</button>
+  <div class="gatehint" id="gateHint">Tick every section above to continue.</div>
+  <button class="dark" id="ackBtn" onclick="loadForm()" disabled>I have read the site rules — continue</button>
   </div><!-- /rulesScreen -->
 
   <!-- ===================== INDUCTION FORM SCREEN (Cognito Form 5) ===================== -->
@@ -161,10 +180,17 @@
 <footer>Elm Building Group · Site Induction · E5100</footer>
 
 <script>
-  /* On acknowledgment, inject the Cognito seamless embed + prefill the project.
-     The binding declaration remains a tick INSIDE Form 5 (attestation rule). */
+  /* Read-gate: enable Continue only when every section checkbox is ticked. */
+  function updateGate(){
+    var boxes = document.querySelectorAll('.sack');
+    var all = Array.prototype.every.call(boxes, function(b){ return b.checked; });
+    document.getElementById('ackBtn').disabled = !all;
+    document.getElementById('gateHint').style.display = all ? 'none' : 'block';
+  }
+
   var formLoaded = false;
   function loadForm(){
+    if(document.getElementById('ackBtn').disabled) return;
     document.getElementById('rulesScreen').style.display = 'none';
     document.getElementById('formScreen').style.display = 'block';
     window.scrollTo(0, 0);
@@ -173,9 +199,7 @@
     s.src = 'https://www.cognitoforms.com/f/seamless.js';
     s.setAttribute('data-key', 'eRaSKgtk10WjYk0CGvkT6Q');
     s.setAttribute('data-form', '9');
-    s.onload = function(){
-      try { Cognito.prefill({ "Project": "4-28" }); } catch(e){ /* prefill best-effort */ }
-    };
+    s.onload = function(){ try { Cognito.prefill({ "Project": "4-28" }); } catch(e){} };
     document.getElementById('inductionForm').appendChild(s);
   }
   function backToRules(){
@@ -183,6 +207,7 @@
     document.getElementById('rulesScreen').style.display = 'block';
     window.scrollTo(0, 0);
   }
+  updateGate();   // start disabled
 </script>
 </body>
 </html>
