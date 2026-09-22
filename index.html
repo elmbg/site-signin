@@ -304,17 +304,34 @@ let OPEN_VISITORS = [];    // [{visitorId, name, company, signInTime}]
 let vData = { firstName:'', lastName:'', company:'', reason:'', escortName:'', escortInductionId:null };
 
 /* POST as a "simple request" (text/plain) so the browser skips the CORS preflight
-   that Power Automate HTTP triggers cannot answer. */
-async function post(url, payload){
-  try{
-    const res = await fetch(url, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
-      body: JSON.stringify(payload)
-    });
-    let data = null; try { data = await res.json(); } catch(e){ data = null; }
-    return { ok: res.ok, status: res.status, data };
-  } catch(e){ return { ok:false, status:0, data:null }; }
+   that Power Automate HTTP triggers cannot answer.
+
+   Retry is OPT-IN via `attempts`, and defaults to 1 — i.e. unchanged behaviour (2026-09-23).
+   ⚠ Do NOT make retry the default here. Unlike induction.html (a pure config read), this
+   page's post() is shared with four WRITE endpoints: SIGNIN, SIGNOUT, VISITOR_CREATE and
+   VISITOR_SIGNOUT. If a write reaches the flow but the response is lost on a site blackspot,
+   a blind retry re-submits it. SIGNIN is protected server-side (returns 409 "already signed
+   in"), but VISITOR_CREATE has no such guard — a retry there would create a DUPLICATE VISITOR
+   RECORD on the attendance register, which is muster evidence. Retrying writes safely needs a
+   client-generated request id that the flows de-duplicate on; that does not exist yet.
+   Retry is therefore enabled only on the idempotent lookups (see the `, 3)` call sites). */
+async function post(url, payload, attempts){
+  var tries = attempts || 1;
+  var lastStatus = 0;
+  for(var i = 0; i < tries; i++){
+    if(i > 0) await new Promise(function(r){ setTimeout(r, i === 1 ? 600 : 1500); });
+    try{
+      const res = await fetch(url, {
+        method:'POST',
+        headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
+        body: JSON.stringify(payload)
+      });
+      if(tries > 1 && res.status >= 500){ lastStatus = res.status; continue; }  // transient
+      let data = null; try { data = await res.json(); } catch(e){ data = null; }
+      return { ok: res.ok, status: res.status, data };
+    } catch(e){ lastStatus = 0; }                                               // network dropped
+  }
+  return { ok:false, status:lastStatus, data:null };
 }
 
 /* ---- helpers ---- */
@@ -654,7 +671,7 @@ function errorScreen(big, msg, retry){
 /* ---- cache load + lifecycle (worker) ---- */
 async function loadCache(){
   // returns 'ok' | 'inactive' | 'network'
-  const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
+  const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' }, 3);
   if(r.status===0)   return 'network';                 // could not reach the flow
   if(r.status===404) return 'inactive';                // PROJECT_INACTIVE or unknown project code
   const { workers, projectName } = readLookup(r.data);
@@ -668,7 +685,7 @@ async function loadCache(){
 async function refreshCache(){
   // silent — only replace the cache on a clean result; keep the last good copy otherwise
   if(MODE==='visitor'){ vRefreshCache(); return; }
-  const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' });
+  const r=await post(LOOKUP_URL,{ projectCode:PROJECT, searchName:'' }, 3);
   const { workers, projectName } = readLookup(r.data);
   if(r.ok && workers){ WORKERS = workers; if(projectName){ PROJECT_NAME = projectName; setLabel(); } }
 }
@@ -706,7 +723,7 @@ function vReadLookup(d){
 }
 
 async function vRefreshCache(){
-  const r=await post(VISITOR_LOOKUP_URL,{ projectCode:PROJECT });
+  const r=await post(VISITOR_LOOKUP_URL,{ projectCode:PROJECT }, 3);
   const { openVisitors, projectName } = vReadLookup(r.data);
   if(r.ok && openVisitors){ OPEN_VISITORS = openVisitors; if(projectName){ PROJECT_NAME=projectName; setLabel(); } }
 }
