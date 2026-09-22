@@ -197,17 +197,30 @@
   function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
   /* POST as a "simple request" (text/plain) so the browser skips the CORS preflight that
-     Power Automate HTTP triggers cannot answer — same pattern as index.html. */
-  async function post(url, payload){
-    try{
-      const res = await fetch(url, {
-        method:'POST',
-        headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
-        body: JSON.stringify(payload)
-      });
-      let data = null; try { data = await res.json(); } catch(e){ data = null; }
-      return { ok: res.ok, status: res.status, data };
-    } catch(e){ return { ok:false, status:0, data:null }; }
+     Power Automate HTTP triggers cannot answer — same pattern as index.html.
+
+     Retries transient failures (2026-09-23). Site reception drops; a single blip used to send
+     the worker straight to the error screen AND leave an orphaned flow run, which surfaced as
+     `Response_200 / ActionResponseTimedOut` and emailed the IMS coordinator claiming an outage
+     when the service was healthy. Retried: a dropped connection (fetch throws) and a gateway
+     5xx. NOT retried: 404 (unknown/inactive project) — that is a real answer, not a blip. */
+  async function post(url, payload, attempts){
+    var tries = attempts || 3;
+    var lastStatus = 0;
+    for(var i = 0; i < tries; i++){
+      if(i > 0) await new Promise(function(r){ setTimeout(r, i === 1 ? 600 : 1500); });
+      try{
+        const res = await fetch(url, {
+          method:'POST',
+          headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
+          body: JSON.stringify(payload)
+        });
+        if(res.status >= 500){ lastStatus = res.status; continue; }   // transient — try again
+        let data = null; try { data = await res.json(); } catch(e){ data = null; }
+        return { ok: res.ok, status: res.status, data };
+      } catch(e){ lastStatus = 0; }                                    // network dropped — try again
+    }
+    return { ok:false, status:lastStatus, data:null };
   }
 
   function errorScreen(big, msg, retry){
@@ -303,7 +316,14 @@
   }
 
   /* ---- lifecycle ---- */
+  /* Re-entry guard (2026-09-23): the error screen's "Try again" button calls init(). Without
+     this, a second tap while a request is still in flight abandons the first one — the flow
+     keeps running, finds no caller, and fires a false "induction page down" alert. */
+  var initInFlight = false;
   async function init(){
+    if(initInFlight) return;
+    initInFlight = true;
+    try{
     if(!PROJECT){
       errorScreen('Missing site code',
         'Please scan the site induction QR code. Do not type this URL directly.', false);
@@ -331,6 +351,9 @@
     renderPerProject(CFG);
     show('s-rules');
     window.scrollTo(0, 0);
+    } finally {
+      initInFlight = false;
+    }
   }
 
   init();
