@@ -259,7 +259,10 @@
     var html = '';
 
     // Your Site Team
-    var team = contactLine('Site Manager', cfg.siteManager, cfg.siteManagerMobile)
+    // SM2 is optional (key absent on the old flow / blank / same person as SM1 -> single SM line, as before)
+    var sm2 = (cfg.siteManager2 && cfg.siteManager2 !== cfg.siteManager) ? cfg.siteManager2 : '';
+    var team = contactLine(sm2 ? 'Site Manager 1' : 'Site Manager', cfg.siteManager, cfg.siteManagerMobile)
+             + (sm2 ? contactLine('Site Manager 2', sm2, cfg.siteManager2Mobile) : '')
              + contactLine('Project Manager', cfg.projectManager, cfg.projectManagerMobile);
     if(team) html += kvBlock('Your Site Team', team);
 
